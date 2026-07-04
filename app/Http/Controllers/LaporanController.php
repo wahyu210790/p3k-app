@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BahanBaku;
+use App\Models\DetailPembelian;
 use App\Models\DetailTransaksi;
 use App\Models\PengeluaranOperasional;
 use App\Models\PiutangPelanggan;
@@ -77,17 +78,50 @@ class LaporanController extends Controller
             ->whereDate('tanggal', '<=', $sampai)
             ->sum('jumlah');
 
-        // Total keuntungan bersih (setelah dikurangi pengeluaran operasional ekstra)
+        // Pembelian bahan baku NON-PRODUK per hari (dianggap sebagai pengeluaran operasional)
+        $pembelianNonProdukRaw = DetailPembelian::join('bahan_baku', 'detail_pembelian.bahan_baku_id', '=', 'bahan_baku.id')
+            ->join('pembelian', 'detail_pembelian.pembelian_id', '=', 'pembelian.id')
+            ->where('bahan_baku.jenis', 'non_produk')
+            ->whereDate('pembelian.tanggal_pembelian', '>=', $dari)
+            ->whereDate('pembelian.tanggal_pembelian', '<=', $sampai)
+            ->selectRaw('DATE(pembelian.tanggal_pembelian) as tanggal, SUM(detail_pembelian.subtotal) as total_non_produk')
+            ->groupByRaw('DATE(pembelian.tanggal_pembelian)')
+            ->pluck('total_non_produk', 'tanggal');
+
+        // Gabungkan data harian penjualan dengan pembelian non-produk
+        $dataHarian = $penjualan->map(fn($d) => array_merge((array) $d, [
+            'pembelian_non_produk' => (float) ($pembelianNonProdukRaw[$d->tanggal] ?? 0),
+        ]));
+
+        // Tambah hari-hari yang hanya ada pembelian non-produk (tanpa penjualan)
+        foreach ($pembelianNonProdukRaw as $tanggal => $total) {
+            if (!$penjualan->contains('tanggal', $tanggal)) {
+                $dataHarian->push([
+                    'tanggal'              => $tanggal,
+                    'omset'                => 0,
+                    'hpp'                  => 0,
+                    'operasional'          => 0,
+                    'keuntungan'           => 0,
+                    'pembelian_non_produk' => (float) $total,
+                ]);
+            }
+        }
+        $dataHarian = $dataHarian->sortBy('tanggal')->values();
+
+        $totalPembelianNonProduk = $pembelianNonProdukRaw->sum();
+
+        // Total keuntungan bersih (setelah dikurangi pengeluaran operasional + pembelian non-produk)
         $totalKeuntunganKotor  = $penjualan->sum('keuntungan');
         $totalOperasionalMasuk = $penjualan->sum('operasional');
-        $labaKotor             = $totalKeuntunganKotor + $totalOperasionalMasuk - $pengeluaran;
+        $labaKotor             = $totalKeuntunganKotor + $totalOperasionalMasuk - $pengeluaran - $totalPembelianNonProduk;
 
         return Inertia::render('Laporan/Keuntungan', [
-            'data_harian'       => $penjualan,
-            'total_pengeluaran' => (float) $pengeluaran,
-            'laba_kotor'        => $labaKotor,
-            'dari'              => $dari,
-            'sampai'            => $sampai,
+            'data_harian'              => $dataHarian,
+            'total_pengeluaran'        => (float) $pengeluaran,
+            'total_pembelian_non_produk' => (float) $totalPembelianNonProduk,
+            'laba_kotor'               => $labaKotor,
+            'dari'                     => $dari,
+            'sampai'                   => $sampai,
         ]);
     }
 

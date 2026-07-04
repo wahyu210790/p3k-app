@@ -11,7 +11,7 @@ class BahanBaku extends Model
 
     protected $fillable = [
         'sku', 'nama', 'satuan', 'stok_saat_ini', 'stok_minimum',
-        'is_rokok', 'isi_per_bungkus', 'is_active',
+        'is_rokok', 'isi_per_bungkus', 'is_active', 'jenis',
     ];
 
     protected $casts = [

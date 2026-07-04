@@ -1,5 +1,6 @@
 import AppLayout from '@/Layouts/AppLayout';
 import { useForm, Link } from '@inertiajs/react';
+import { CubeIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 
 const Field = ({ label, error, children }) => (
     <div>
@@ -16,6 +17,7 @@ export default function BahanBakuForm({ bahan_baku, satuan_options }) {
         nama:           bahan_baku?.nama ?? '',
         satuan:         bahan_baku?.satuan ?? 'pcs',
         stok_minimum:   bahan_baku?.stok_minimum ?? 0,
+        jenis:          bahan_baku?.jenis ?? 'produk',
         is_rokok:       bahan_baku?.is_rokok ?? false,
         isi_per_bungkus: bahan_baku?.isi_per_bungkus ?? '',
         is_active:      bahan_baku?.is_active ?? true,
@@ -38,6 +40,47 @@ export default function BahanBakuForm({ bahan_baku, satuan_options }) {
                 </div>
 
                 <form onSubmit={submit} className="bg-slate-900/60 rounded-2xl border border-slate-700/50 p-6 space-y-5">
+
+                    {/* Jenis Bahan Baku */}
+                    <Field label="Jenis Bahan Baku" error={errors.jenis}>
+                        <div className="grid grid-cols-2 gap-3 mt-1">
+                            <button
+                                type="button"
+                                onClick={() => setData('jenis', 'produk')}
+                                className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all text-left ${
+                                    data.jenis === 'produk'
+                                        ? 'border-amber-500 bg-amber-500/10'
+                                        : 'border-slate-700 bg-slate-800/60 hover:border-slate-600'
+                                }`}
+                            >
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${data.jenis === 'produk' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700 text-slate-400'}`}>
+                                    <CubeIcon className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className={`text-sm font-bold ${data.jenis === 'produk' ? 'text-amber-400' : 'text-slate-300'}`}>Produk</p>
+                                    <p className="text-xs text-slate-500 leading-tight">Masuk ke COGS</p>
+                                </div>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setData('jenis', 'non_produk')}
+                                className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all text-left ${
+                                    data.jenis === 'non_produk'
+                                        ? 'border-blue-500 bg-blue-500/10'
+                                        : 'border-slate-700 bg-slate-800/60 hover:border-slate-600'
+                                }`}
+                            >
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${data.jenis === 'non_produk' ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-700 text-slate-400'}`}>
+                                    <WrenchScrewdriverIcon className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className={`text-sm font-bold ${data.jenis === 'non_produk' ? 'text-blue-400' : 'text-slate-300'}`}>Non-Produk</p>
+                                    <p className="text-xs text-slate-500 leading-tight">Ops. / pendukung</p>
+                                </div>
+                            </button>
+                        </div>
+                    </Field>
+
                     <Field label="SKU (Kode Bahan Baku)" error={errors.sku}>
                         <input type="text" value={data.sku} onChange={e => setData('sku', e.target.value.toUpperCase())}
                             className={inputClass} placeholder="Contoh: BB-001 atau MIE-GRG" />

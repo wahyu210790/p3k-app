@@ -1,16 +1,34 @@
 import AppLayout from '@/Layouts/AppLayout';
 import { rupiah } from '@/lib/utils';
 import { Link, router } from '@inertiajs/react';
-import { PlusIcon, PencilSquareIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilSquareIcon, ExclamationTriangleIcon, CubeIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
 export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const activeJenis = filters.jenis ?? 'semua';
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route('bahan-baku.index'), { search }, { preserveState: true });
+        router.get(route('bahan-baku.index'), { search, jenis: activeJenis }, { preserveState: true });
     };
+
+    const setJenis = (jenis) => {
+        router.get(route('bahan-baku.index'), { jenis, search }, { preserveState: true });
+    };
+
+    const totalProduk    = bahan_baku.filter(b => b.jenis === 'produk').reduce((s, b) => s + b.nilai_stok, 0);
+    const totalNonProduk = bahan_baku.filter(b => b.jenis === 'non_produk').reduce((s, b) => s + b.nilai_stok, 0);
+
+    const tabs = [
+        { key: 'semua',      label: 'Semua',      icon: null,                         count: bahan_baku.length },
+        { key: 'produk',     label: 'Produk',      icon: CubeIcon,          color: 'amber', count: bahan_baku.filter(b => b.jenis === 'produk').length },
+        { key: 'non_produk', label: 'Non-Produk',  icon: WrenchScrewdriverIcon, color: 'blue', count: bahan_baku.filter(b => b.jenis === 'non_produk').length },
+    ];
+
+    const displayedBahanBaku = activeJenis === 'semua'
+        ? bahan_baku
+        : bahan_baku.filter(b => b.jenis === activeJenis);
 
     return (
         <AppLayout title="Bahan Baku">
@@ -19,12 +37,55 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                 <div className="flex items-center justify-between mb-5">
                     <div>
                         <h2 className="text-xl font-bold text-white">Bahan Baku</h2>
-                        <p className="text-xs text-slate-400 mt-0.5">Total nilai stok: <span className="text-amber-400 font-semibold">{rupiah(total_nilai)}</span></p>
+                        <div className="flex items-center gap-3 mt-1">
+                            <p className="text-xs text-slate-400">
+                                Total nilai stok: <span className="text-amber-400 font-semibold">{rupiah(total_nilai)}</span>
+                            </p>
+                            {activeJenis === 'semua' && (
+                                <>
+                                    <span className="text-slate-600">·</span>
+                                    <p className="text-xs text-slate-400">
+                                        Produk: <span className="text-amber-400 font-semibold">{rupiah(totalProduk)}</span>
+                                    </p>
+                                    <span className="text-slate-600">·</span>
+                                    <p className="text-xs text-slate-400">
+                                        Non-Produk: <span className="text-blue-400 font-semibold">{rupiah(totalNonProduk)}</span>
+                                    </p>
+                                </>
+                            )}
+                        </div>
                     </div>
                     <Link href={route('bahan-baku.create')}
                         className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm rounded-xl transition-all">
                         <PlusIcon className="w-4 h-4" /> Tambah
                     </Link>
+                </div>
+
+                {/* Tabs Jenis */}
+                <div className="flex items-center gap-2 mb-4">
+                    {tabs.map(tab => {
+                        const isActive = activeJenis === tab.key;
+                        const colorMap = {
+                            amber: isActive ? 'bg-amber-500/15 border-amber-500/50 text-amber-400' : 'border-slate-700/50 text-slate-400 hover:border-slate-600',
+                            blue:  isActive ? 'bg-blue-500/15 border-blue-500/50 text-blue-400'   : 'border-slate-700/50 text-slate-400 hover:border-slate-600',
+                        };
+                        const cls = tab.color
+                            ? colorMap[tab.color]
+                            : isActive ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-700/50 text-slate-400 hover:border-slate-600';
+                        return (
+                            <button
+                                key={tab.key}
+                                onClick={() => setJenis(tab.key)}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${cls}`}
+                            >
+                                {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
+                                {tab.label}
+                                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-slate-700'}`}>
+                                    {tab.count}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* Filter */}
@@ -54,6 +115,7 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                             <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
                                     <th className="text-left px-4 py-3">SKU</th>
                                     <th className="text-left px-4 py-3">Bahan Baku</th>
+                                    <th className="text-center px-4 py-3">Jenis</th>
                                     <th className="text-right px-4 py-3">Stok</th>
                                     <th className="text-right px-4 py-3">Min Stok</th>
                                     <th className="text-right px-4 py-3">HPP Rata-rata</th>
@@ -62,13 +124,13 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
-                                {bahan_baku.length === 0 ? (
+                                {displayedBahanBaku.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
+                                        <td colSpan={8} className="px-4 py-12 text-center text-slate-500">
                                             Tidak ada bahan baku
                                         </td>
                                     </tr>
-                                ) : bahan_baku.map(b => (
+                                ) : displayedBahanBaku.map(b => (
                                     <tr key={b.id} className="hover:bg-slate-800/40 transition-colors">
                                         <td className="px-4 py-3">
                                             {b.sku
@@ -86,6 +148,17 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                                                     {b.is_rokok && <p className="text-xs text-slate-500">{b.isi_per_bungkus} batang/bungkus</p>}
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            {b.jenis === 'produk' ? (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                                                    <CubeIcon className="w-3 h-3" /> Produk
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                                                    <WrenchScrewdriverIcon className="w-3 h-3" /> Non-Produk
+                                                </span>
+                                            )}
                                         </td>
                                         <td className={`px-4 py-3 text-right font-semibold ${b.is_stok_rendah ? 'text-red-400' : 'text-white'}`}>
                                             {b.stok_saat_ini} {b.satuan}

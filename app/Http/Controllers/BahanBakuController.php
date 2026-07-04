@@ -32,6 +32,7 @@ class BahanBakuController extends Controller
                 'sku'            => $b->sku,
                 'nama'           => $b->nama,
                 'satuan'         => $b->satuan,
+                'jenis'          => $b->jenis,
                 'stok_saat_ini'  => (float) $b->stok_saat_ini,
                 'stok_minimum'   => (float) $b->stok_minimum,
                 'is_rokok'       => $b->is_rokok,
@@ -63,6 +64,7 @@ class BahanBakuController extends Controller
             'nama'           => 'required|string|max:100|unique:bahan_baku,nama',
             'satuan'         => 'required|string',
             'stok_minimum'   => 'required|numeric|min:0',
+            'jenis'          => 'required|in:produk,non_produk',
             'is_rokok'       => 'boolean',
             'isi_per_bungkus' => 'nullable|integer|min:1',
         ]);
@@ -92,6 +94,7 @@ class BahanBakuController extends Controller
             'nama'           => 'required|string|max:100|unique:bahan_baku,nama,' . $bahanBaku->id,
             'satuan'         => 'required|string',
             'stok_minimum'   => 'required|numeric|min:0',
+            'jenis'          => 'required|in:produk,non_produk',
             'is_rokok'       => 'boolean',
             'isi_per_bungkus' => 'nullable|integer|min:1',
             'is_active'      => 'boolean',
