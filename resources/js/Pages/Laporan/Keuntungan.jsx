@@ -4,8 +4,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { PrinterIcon, CurrencyDollarIcon, ReceiptRefundIcon, ArrowTrendingUpIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function LaporanKeuntungan({ data_harian, total_pengeluaran, total_pembelian_non_produk, laba_kotor, dari, sampai }) {
+    const { items: sortedDataHarian, sortConfig, requestSort } = useSortableData(data_harian);
     const [tglDari, setTglDari] = useState(dari);
     const [tglSampai, setTglSampai] = useState(sampai);
 
@@ -154,23 +157,23 @@ export default function LaporanKeuntungan({ data_harian, total_pengeluaran, tota
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 print:border-slate-400 text-xs text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                                    <th className="text-left px-5 py-3.5">Tanggal</th>
-                                    <th className="text-right px-5 py-3.5">Omset Jual</th>
-                                    <th className="text-right px-5 py-3.5">HPP (Modal Keluar)</th>
-                                    <th className="text-right px-5 py-3.5">Dana Ops. Masuk</th>
-                                    <th className="text-right px-5 py-3.5">Keuntungan Murni</th>
-                                    <th className="text-right px-5 py-3.5 text-orange-400">Beli Non-Produk</th>
+                                    <SortableHeader label="Tanggal" sortKey="tanggal" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Omset Jual" sortKey="omset" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="HPP (Modal Keluar)" sortKey="hpp" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Dana Ops. Masuk" sortKey="operasional" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Keuntungan Murni" sortKey="keuntungan" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Beli Non-Produk" sortKey="pembelian_non_produk" currentSort={sortConfig} onSort={requestSort} align="right" className="text-orange-400" />
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30 print:divide-slate-200">
-                                {data_harian.length === 0 ? (
+                                {sortedDataHarian.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
                                             Tidak ada data penjualan pada periode ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    data_harian.map((d, idx) => (
+                                    sortedDataHarian.map((d, idx) => (
                                         <tr key={idx} className="hover:bg-slate-800/40 print:text-slate-900 transition-colors">
                                             <td className="px-5 py-3.5 font-bold text-white print:text-slate-900">
                                                 {tanggalIndo(d.tanggal)}

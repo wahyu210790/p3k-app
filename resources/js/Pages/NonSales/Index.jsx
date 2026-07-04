@@ -3,8 +3,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { Link, router } from '@inertiajs/react';
 import { PlusIcon, EyeIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function NonSalesIndex({ non_sales, label_kategori, filters }) {
+    const { items: sortedNonSales, sortConfig, requestSort } = useSortableData(non_sales.data);
     const [kategori, setKategori] = useState(filters.kategori ?? '');
     const [dari, setDari] = useState(filters.dari ?? '');
     const [sampai, setSampai] = useState(filters.sampai ?? '');
@@ -115,23 +118,23 @@ export default function NonSalesIndex({ non_sales, label_kategori, filters }) {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
-                                    <th className="text-left px-5 py-3.5">Tanggal</th>
-                                    <th className="text-left px-5 py-3.5">Kategori</th>
-                                    <th className="text-left px-5 py-3.5">Catatan</th>
-                                    <th className="text-right px-5 py-3.5">Total HPP</th>
-                                    <th className="text-left px-5 py-3.5">Dicatat Oleh</th>
+                                    <SortableHeader label="Tanggal" sortKey="tanggal" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Kategori" sortKey="kategori" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Catatan" sortKey="catatan" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Total HPP" sortKey="total_hpp" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Dicatat Oleh" sortKey="user.name" currentSort={sortConfig} onSort={requestSort} align="left" />
                                     <th className="text-center px-5 py-3.5">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
-                                {non_sales.data.length === 0 ? (
+                                {sortedNonSales.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-5 py-16 text-center text-slate-500">
                                             Belum ada catatan non-sales pada filter ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    non_sales.data.map((ns) => (
+                                    sortedNonSales.map((ns) => (
                                         <tr key={ns.id} className="hover:bg-slate-800/40 transition-colors">
                                             <td className="px-5 py-3.5 text-slate-300 font-medium whitespace-nowrap">
                                                 {tanggalIndo(ns.tanggal)}

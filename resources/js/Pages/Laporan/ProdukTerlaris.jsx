@@ -4,8 +4,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { PrinterIcon, FireIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function LaporanProdukTerlaris({ produk_terlaris, dari, sampai }) {
+    const { items: sortedProdukTerlaris, sortConfig, requestSort } = useSortableData(produk_terlaris);
     const [tglDari, setTglDari] = useState(dari);
     const [tglSampai, setTglSampai] = useState(sampai);
 
@@ -81,22 +84,22 @@ export default function LaporanProdukTerlaris({ produk_terlaris, dari, sampai })
                             <thead>
                                 <tr className="border-b border-slate-700/50 print:border-slate-400 text-xs text-slate-400 print:text-slate-600 uppercase tracking-wider">
                                     <th className="text-left px-5 py-3.5 w-16">Rank</th>
-                                    <th className="text-left px-5 py-3.5">Nama Produk</th>
-                                    <th className="text-left px-5 py-3.5">Kategori</th>
-                                    <th className="text-right px-5 py-3.5">Total Terjual (Qty)</th>
-                                    <th className="text-right px-5 py-3.5">Total Omset</th>
-                                    <th className="text-right px-5 py-3.5">Total Keuntungan</th>
+                                    <SortableHeader label="Nama Produk" sortKey="produk.nama" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Kategori" sortKey="produk.kategori" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Total Terjual (Qty)" sortKey="total_terjual" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Total Omset" sortKey="total_omset" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Total Keuntungan" sortKey="total_keuntungan" currentSort={sortConfig} onSort={requestSort} align="right" />
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30 print:divide-slate-200">
-                                {produk_terlaris.length === 0 ? (
+                                {sortedProdukTerlaris.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
                                             Belum ada penjualan produk pada periode ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    produk_terlaris.map((p, idx) => (
+                                    sortedProdukTerlaris.map((p, idx) => (
                                         <tr key={idx} className="hover:bg-slate-800/40 print:text-slate-900 transition-colors">
                                             <td className="px-5 py-3.5 font-black text-amber-400 print:text-slate-900">
                                                 #{idx + 1}

@@ -2,8 +2,11 @@ import AppLayout from '@/Layouts/AppLayout';
 import LaporanTabs from './LaporanTabs';
 import { rupiah } from '@/lib/utils';
 import { PrinterIcon, CubeIcon, ExclamationTriangleIcon, BanknotesIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function LaporanStok({ bahan_baku, total_nilai, jumlah_rendah }) {
+    const { items: sortedBahanBaku, sortConfig, requestSort } = useSortableData(bahan_baku);
     const handlePrint = () => window.print();
 
     return (
@@ -87,23 +90,23 @@ export default function LaporanStok({ bahan_baku, total_nilai, jumlah_rendah }) 
                             <thead>
                                 <tr className="border-b border-slate-700/50 print:border-slate-400 text-xs text-slate-400 print:text-slate-600 uppercase tracking-wider">
                                     <th className="text-left px-5 py-3.5">No</th>
-                                    <th className="text-left px-5 py-3.5">Nama Bahan Baku</th>
-                                    <th className="text-right px-5 py-3.5">Stok Saat Ini</th>
-                                    <th className="text-right px-5 py-3.5">Stok Minimum</th>
-                                    <th className="text-right px-5 py-3.5">HPP Rata-Rata / Satuan</th>
-                                    <th className="text-right px-5 py-3.5">Nilai Akumulasi Stok</th>
-                                    <th className="text-center px-5 py-3.5">Status</th>
+                                    <SortableHeader label="Nama Bahan Baku" sortKey="nama" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Stok Saat Ini" sortKey="stok_saat_ini" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Stok Minimum" sortKey="stok_minimum" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="HPP Rata-Rata / Satuan" sortKey="hpp_rata_rata" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Nilai Akumulasi Stok" sortKey="nilai_stok" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Status" sortKey="is_rendah" currentSort={sortConfig} onSort={requestSort} align="center" />
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30 print:divide-slate-200">
-                                {bahan_baku.length === 0 ? (
+                                {sortedBahanBaku.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
                                             Belum ada data bahan baku.
                                         </td>
                                     </tr>
                                 ) : (
-                                    bahan_baku.map((b, idx) => (
+                                    sortedBahanBaku.map((b, idx) => (
                                         <tr key={b.id} className="hover:bg-slate-800/40 print:text-slate-900 transition-colors">
                                             <td className="px-5 py-3.5 text-xs text-slate-400">{idx + 1}</td>
                                             <td className="px-5 py-3.5 font-bold text-white print:text-slate-900">

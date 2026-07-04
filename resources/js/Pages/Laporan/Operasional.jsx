@@ -4,8 +4,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { PrinterIcon, ReceiptRefundIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function LaporanOperasional({ per_kategori, detail, label_kategori, dari, sampai }) {
+    const { items: sortedDetail, sortConfig, requestSort } = useSortableData(detail.data);
     const [tglDari, setTglDari] = useState(dari);
     const [tglSampai, setTglSampai] = useState(sampai);
 
@@ -105,22 +108,22 @@ export default function LaporanOperasional({ per_kategori, detail, label_kategor
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 print:border-slate-400 text-xs text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                                    <th className="text-left px-5 py-3.5">Tanggal</th>
-                                    <th className="text-left px-5 py-3.5">Kategori</th>
-                                    <th className="text-left px-5 py-3.5">Keterangan</th>
-                                    <th className="text-right px-5 py-3.5">Jumlah</th>
-                                    <th className="text-left px-5 py-3.5">Dicatat Oleh</th>
+                                    <SortableHeader label="Tanggal" sortKey="tanggal" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Kategori" sortKey="kategori" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Keterangan" sortKey="keterangan" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Jumlah" sortKey="jumlah" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Dicatat Oleh" sortKey="user.name" currentSort={sortConfig} onSort={requestSort} align="left" />
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30 print:divide-slate-200">
-                                {detail.data.length === 0 ? (
+                                {sortedDetail.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-5 py-12 text-center text-slate-500">
                                             Belum ada catatan pengeluaran pada periode ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    detail.data.map((d) => (
+                                    sortedDetail.map((d) => (
                                         <tr key={d.id} className="hover:bg-slate-800/40 print:text-slate-900 transition-colors">
                                             <td className="px-5 py-3.5 whitespace-nowrap text-slate-300 print:text-slate-800">
                                                 {tanggalIndo(d.tanggal)}

@@ -2,8 +2,11 @@ import AppLayout from '@/Layouts/AppLayout';
 import { tanggalIndo } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { PlusIcon, EyeIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function StockOpnameIndex({ opname }) {
+    const { items: sortedOpname, sortConfig, requestSort } = useSortableData(opname.data);
     return (
         <AppLayout title="Stock Opname">
             <div className="max-w-5xl mx-auto">
@@ -27,22 +30,22 @@ export default function StockOpnameIndex({ opname }) {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
-                                    <th className="text-left px-5 py-3.5">Tanggal Opname</th>
-                                    <th className="text-center px-5 py-3.5">Jumlah Bahan Diperiksa</th>
-                                    <th className="text-left px-5 py-3.5">Catatan</th>
-                                    <th className="text-left px-5 py-3.5">Diperiksa Oleh</th>
+                                    <SortableHeader label="Tanggal Opname" sortKey="tanggal" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Jumlah Bahan Diperiksa" sortKey="detail_stock_opname_count" currentSort={sortConfig} onSort={requestSort} align="center" />
+                                    <SortableHeader label="Catatan" sortKey="catatan" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Diperiksa Oleh" sortKey="user.name" currentSort={sortConfig} onSort={requestSort} align="left" />
                                     <th className="text-center px-5 py-3.5">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
-                                {opname.data.length === 0 ? (
+                                {sortedOpname.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-5 py-16 text-center text-slate-500">
                                             Belum ada catatan stock opname. <Link href={route('stock-opname.create')} className="text-amber-400 hover:underline">Lakukan pemeriksaan sekarang →</Link>
                                         </td>
                                     </tr>
                                 ) : (
-                                    opname.data.map((o) => (
+                                    sortedOpname.map((o) => (
                                         <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
                                             <td className="px-5 py-3.5">
                                                 <div className="flex items-center gap-2.5">

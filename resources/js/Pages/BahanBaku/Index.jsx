@@ -3,6 +3,8 @@ import { rupiah } from '@/lib/utils';
 import { Link, router } from '@inertiajs/react';
 import { PlusIcon, PencilSquareIcon, ExclamationTriangleIcon, CubeIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
     const [search, setSearch] = useState(filters.search ?? '');
@@ -29,6 +31,8 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
     const displayedBahanBaku = activeJenis === 'semua'
         ? bahan_baku
         : bahan_baku.filter(b => b.jenis === activeJenis);
+
+    const { items: sortedBahanBaku, sortConfig, requestSort } = useSortableData(displayedBahanBaku);
 
     return (
         <AppLayout title="Bahan Baku">
@@ -112,25 +116,25 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                            <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
-                                    <th className="text-left px-4 py-3">SKU</th>
-                                    <th className="text-left px-4 py-3">Bahan Baku</th>
-                                    <th className="text-center px-4 py-3">Jenis</th>
-                                    <th className="text-right px-4 py-3">Stok</th>
-                                    <th className="text-right px-4 py-3">Min Stok</th>
-                                    <th className="text-right px-4 py-3">HPP Rata-rata</th>
-                                    <th className="text-right px-4 py-3">Nilai Stok</th>
+                                <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
+                                    <SortableHeader label="SKU" sortKey="sku" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Bahan Baku" sortKey="nama" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Jenis" sortKey="jenis" currentSort={sortConfig} onSort={requestSort} align="center" />
+                                    <SortableHeader label="Stok" sortKey="stok_saat_ini" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Min Stok" sortKey="stok_minimum" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="HPP Rata-rata" sortKey="hpp_rata_rata" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Nilai Stok" sortKey="nilai_stok" currentSort={sortConfig} onSort={requestSort} align="right" />
                                     <th className="text-center px-4 py-3">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
-                                {displayedBahanBaku.length === 0 ? (
+                                {sortedBahanBaku.length === 0 ? (
                                     <tr>
                                         <td colSpan={8} className="px-4 py-12 text-center text-slate-500">
                                             Tidak ada bahan baku
                                         </td>
                                     </tr>
-                                ) : displayedBahanBaku.map(b => (
+                                ) : sortedBahanBaku.map(b => (
                                     <tr key={b.id} className="hover:bg-slate-800/40 transition-colors">
                                         <td className="px-4 py-3">
                                             {b.sku

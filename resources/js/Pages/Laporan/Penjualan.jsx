@@ -4,8 +4,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { router, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { PrinterIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function LaporanPenjualan({ transaksi, ringkasan, dari, sampai }) {
+    const { items: sortedTransaksi, sortConfig, requestSort } = useSortableData(transaksi.data);
     const [tglDari, setTglDari] = useState(dari);
     const [tglSampai, setTglSampai] = useState(sampai);
 
@@ -109,24 +112,24 @@ export default function LaporanPenjualan({ transaksi, ringkasan, dari, sampai })
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 print:border-slate-400 text-xs text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                                    <th className="text-left px-4 py-3">No Nota / Tanggal</th>
-                                    <th className="text-left px-4 py-3">Metode / Kasir</th>
-                                    <th className="text-right px-4 py-3">Omset Jual</th>
-                                    <th className="text-right px-4 py-3">Dompet Modal</th>
-                                    <th className="text-right px-4 py-3">Operasional</th>
-                                    <th className="text-right px-4 py-3">Keuntungan</th>
+                                    <SortableHeader label="No Nota / Tanggal" sortKey="nomor_transaksi" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Metode / Kasir" sortKey="metode_pembayaran" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Omset Jual" sortKey="total_harga_jual" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Dompet Modal" sortKey="total_dana_modal" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Operasional" sortKey="total_dana_operasional" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Keuntungan" sortKey="total_keuntungan" currentSort={sortConfig} onSort={requestSort} align="right" />
                                     <th className="text-center px-4 py-3 print:hidden">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30 print:divide-slate-200">
-                                {transaksi.data.length === 0 ? (
+                                {sortedTransaksi.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
                                             Tidak ada transaksi pada periode ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    transaksi.data.map((t) => (
+                                    sortedTransaksi.map((t) => (
                                         <tr key={t.id} className="hover:bg-slate-800/40 print:text-slate-900 transition-colors">
                                             <td className="px-4 py-3">
                                                 <p className="font-bold text-white print:text-slate-900">{t.nomor_transaksi || `TRX-${t.id}`}</p>

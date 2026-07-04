@@ -3,8 +3,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { Link, router } from '@inertiajs/react';
 import { PlusIcon, EyeIcon, TruckIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function PembelianIndex({ pembelian, suppliers, filters }) {
+    const { items: sortedPembelian, sortConfig, requestSort } = useSortableData(pembelian.data);
     const [supplierId, setSupplierId] = useState(filters.supplier_id ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
     const [dari, setDari] = useState(filters.dari ?? '');
@@ -124,24 +127,24 @@ export default function PembelianIndex({ pembelian, suppliers, filters }) {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
-                                    <th className="text-left px-5 py-3.5">Faktur / Tanggal</th>
-                                    <th className="text-left px-5 py-3.5">Supplier</th>
-                                    <th className="text-right px-5 py-3.5">Total Tagihan</th>
-                                    <th className="text-right px-5 py-3.5">Dibayar</th>
-                                    <th className="text-center px-5 py-3.5">Status</th>
-                                    <th className="text-left px-5 py-3.5">Dicatat Oleh</th>
+                                    <SortableHeader label="Faktur / Tanggal" sortKey="nomor_faktur" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Supplier" sortKey="supplier.nama" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Total Tagihan" sortKey="total_tagihan" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Dibayar" sortKey="jumlah_bayar" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Status" sortKey="status_pembayaran" currentSort={sortConfig} onSort={requestSort} align="center" />
+                                    <SortableHeader label="Dicatat Oleh" sortKey="user.name" currentSort={sortConfig} onSort={requestSort} align="left" />
                                     <th className="text-center px-5 py-3.5">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
-                                {pembelian.data.length === 0 ? (
+                                {sortedPembelian.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-5 py-16 text-center text-slate-500">
                                             Belum ada catatan pembelian pada filter ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    pembelian.data.map((p) => (
+                                    sortedPembelian.map((p) => (
                                         <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
                                             <td className="px-5 py-3.5">
                                                 <div className="flex items-center gap-2.5">

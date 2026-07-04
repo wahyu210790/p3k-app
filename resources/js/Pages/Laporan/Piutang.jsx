@@ -4,8 +4,11 @@ import { rupiah, tanggalIndo } from '@/lib/utils';
 import { router, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { PrinterIcon, ClockIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { useSortableData } from '@/lib/sort';
+import SortableHeader from '@/Components/SortableHeader';
 
 export default function LaporanPiutang({ piutang, total_belum_lunas, filters }) {
+    const { items: sortedPiutang, sortConfig, requestSort } = useSortableData(piutang.data);
     const [status, setStatus] = useState(filters.status ?? 'belum_lunas');
 
     const handleFilter = (st) => {
@@ -86,24 +89,24 @@ export default function LaporanPiutang({ piutang, total_belum_lunas, filters }) 
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 print:border-slate-400 text-xs text-slate-400 print:text-slate-600 uppercase tracking-wider">
-                                    <th className="text-left px-5 py-3.5">Tanggal / Transaksi</th>
-                                    <th className="text-left px-5 py-3.5">Nama & WA Pelanggan</th>
-                                    <th className="text-right px-5 py-3.5">Total Piutang</th>
-                                    <th className="text-right px-5 py-3.5">Sudah Dibayar</th>
-                                    <th className="text-right px-5 py-3.5">Sisa Tagihan</th>
-                                    <th className="text-center px-5 py-3.5">Status</th>
+                                    <SortableHeader label="Tanggal / Transaksi" sortKey="tanggal_piutang" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Nama & WA Pelanggan" sortKey="nama_pelanggan" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Total Piutang" sortKey="jumlah_piutang" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Sudah Dibayar" sortKey="jumlah_terbayar" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Sisa Tagihan" sortKey="sisa_piutang" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <SortableHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" />
                                     <th className="text-center px-5 py-3.5 print:hidden">Kelola</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30 print:divide-slate-200">
-                                {piutang.data.length === 0 ? (
+                                {sortedPiutang.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
                                             Tidak ada data piutang pada filter ini.
                                         </td>
                                     </tr>
                                 ) : (
-                                    piutang.data.map((p) => (
+                                    sortedPiutang.map((p) => (
                                         <tr key={p.id} className="hover:bg-slate-800/40 print:text-slate-900 transition-colors">
                                             <td className="px-5 py-3.5">
                                                 <p className="font-semibold text-white print:text-slate-900">{tanggalIndo(p.tanggal_piutang)}</p>
