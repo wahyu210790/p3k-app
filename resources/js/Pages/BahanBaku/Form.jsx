@@ -106,7 +106,7 @@ export default function BahanBakuForm({ bahan_baku, satuan_options }) {
                     <div className="flex items-center justify-between p-3 bg-slate-800/60 rounded-xl">
                         <div>
                             <p className="text-sm font-medium text-white">Produk Rokok?</p>
-                            <p className="text-xs text-slate-500">Aktifkan jika ini adalah rokok (ada satuan bungkus dan batang)</p>
+                            <p className="text-xs text-slate-500">Aktifkan jika ini adalah rokok (misal dalam satuan pck / pcs)</p>
                         </div>
                         <button type="button" onClick={() => setData('is_rokok', !data.is_rokok)}
                             className={`w-11 h-6 rounded-full transition-colors ${data.is_rokok ? 'bg-amber-500' : 'bg-slate-600'}`}>
@@ -115,7 +115,7 @@ export default function BahanBakuForm({ bahan_baku, satuan_options }) {
                     </div>
 
                     {data.is_rokok && (
-                        <Field label="Isi per Bungkus (batang)" error={errors.isi_per_bungkus}>
+                        <Field label="Isi per Kemasan / Bungkus (pcs / batang)" error={errors.isi_per_bungkus}>
                             <input type="number" value={data.isi_per_bungkus} onChange={e => setData('isi_per_bungkus', e.target.value)}
                                 className={inputClass} min="1" placeholder="Contoh: 12" />
                         </Field>

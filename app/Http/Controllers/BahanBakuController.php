@@ -53,7 +53,7 @@ class BahanBakuController extends Controller
     public function create(): Response
     {
         return Inertia::render('BahanBaku/Form', [
-            'satuan_options' => ['pcs', 'butir', 'gram', 'kg', 'ml', 'liter', 'batang', 'botol', 'bungkus'],
+            'satuan_options' => ['pcs', 'gr', 'ml', 'btl', 'pck', 'gln'],
         ]);
     }
 
@@ -79,7 +79,7 @@ class BahanBakuController extends Controller
     {
         return Inertia::render('BahanBaku/Form', [
             'bahan_baku'     => $bahanBaku,
-            'satuan_options' => ['pcs', 'butir', 'gram', 'kg', 'ml', 'liter', 'batang', 'botol', 'bungkus'],
+            'satuan_options' => ['pcs', 'gr', 'ml', 'btl', 'pck', 'gln'],
             'batches'        => FifoBatch::where('bahan_baku_id', $bahanBaku->id)
                 ->where('jumlah_sisa', '>', 0)
                 ->orderBy('tanggal_masuk')
