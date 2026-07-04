@@ -3,6 +3,7 @@ import { useForm, Link } from '@inertiajs/react';
 import { PlusIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { useState, useMemo } from 'react';
 import { rupiah } from '@/lib/utils';
+import SearchableSelect from '@/Components/SearchableSelect';
 
 const Field = ({ label, error, children }) => (
     <div>
@@ -13,6 +14,14 @@ const Field = ({ label, error, children }) => (
 );
 
 export default function PembelianCreate({ suppliers, bahan_baku }) {
+    const bahanBakuOptions = useMemo(() => {
+        return bahan_baku.map((b) => ({
+            value: b.id,
+            label: b.nama,
+            sublabel: `Stok: ${b.stok_saat_ini} ${b.satuan}`,
+        }));
+    }, [bahan_baku]);
+
     const { data, setData, post, processing, errors } = useForm({
         supplier_id:       '',
         nomor_faktur:      '',
@@ -133,21 +142,14 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
                                 const selectedBahan = bahan_baku.find(b => b.id == item.bahan_baku_id);
                                 const subtotal = (parseFloat(item.jumlah) || 0) * (parseFloat(item.harga_satuan) || 0);
                                 return (
-                                    <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/40">
-                                        <div className="flex-1 w-full sm:w-auto">
-                                            <select
+                                    <div key={idx} style={{ zIndex: data.items.length - idx }} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/40 relative">
+                                        <div className="flex-1 w-full sm:w-auto min-w-0">
+                                            <SearchableSelect
+                                                options={bahanBakuOptions}
                                                 value={item.bahan_baku_id}
-                                                onChange={(e) => updateItem(idx, 'bahan_baku_id', e.target.value)}
-                                                className={inputClass}
-                                                required
-                                            >
-                                                <option value="">Pilih Bahan Baku...</option>
-                                                {bahan_baku.map((b) => (
-                                                    <option key={b.id} value={b.id}>
-                                                        {b.nama} (Stok: {b.stok_saat_ini} {b.satuan})
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                onChange={(val) => updateItem(idx, 'bahan_baku_id', val)}
+                                                placeholder="Pilih Bahan Baku (ketik untuk mencari)..."
+                                            />
                                         </div>
 
                                         <div className="w-full sm:w-36">

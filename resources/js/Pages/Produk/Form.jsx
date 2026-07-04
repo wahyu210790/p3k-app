@@ -1,6 +1,8 @@
 import AppLayout from '@/Layouts/AppLayout';
 import { useForm, Link } from '@inertiajs/react';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { useMemo } from 'react';
+import SearchableSelect from '@/Components/SearchableSelect';
 
 const Field = ({ label, error, children }) => (
     <div>
@@ -12,6 +14,14 @@ const Field = ({ label, error, children }) => (
 
 export default function ProdukForm({ produk, bahan_baku, kategori_options }) {
     const isEdit = !!produk;
+
+    const bahanBakuOptions = useMemo(() => {
+        return bahan_baku.map((b) => ({
+            value: b.id,
+            label: b.nama,
+            sublabel: b.satuan,
+        }));
+    }, [bahan_baku]);
 
     const { data, setData, post, put, processing, errors } = useForm({
         _method:    isEdit ? 'PUT' : undefined,
@@ -116,15 +126,15 @@ export default function ProdukForm({ produk, bahan_baku, kategori_options }) {
                             <>
                                 <div className="space-y-2 mb-3">
                                     {data.resep.map((r, idx) => (
-                                        <div key={idx} className="flex gap-2 items-center">
-                                            <select value={r.bahan_baku_id}
-                                                onChange={e => updateIngredient(idx, 'bahan_baku_id', e.target.value)}
-                                                className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
-                                                <option value="">Pilih bahan baku...</option>
-                                                {bahan_baku.map(b => (
-                                                    <option key={b.id} value={b.id}>{b.nama} ({b.satuan})</option>
-                                                ))}
-                                            </select>
+                                        <div key={idx} style={{ zIndex: data.resep.length - idx }} className="flex gap-2 items-center relative">
+                                            <div className="flex-1 min-w-0">
+                                                <SearchableSelect
+                                                    options={bahanBakuOptions}
+                                                    value={r.bahan_baku_id}
+                                                    onChange={(val) => updateIngredient(idx, 'bahan_baku_id', val)}
+                                                    placeholder="Pilih bahan baku (ketik untuk mencari)..."
+                                                />
+                                            </div>
                                             <input type="number" value={r.jumlah}
                                                 onChange={e => updateIngredient(idx, 'jumlah', e.target.value)}
                                                 placeholder="Jml" min="0.001" step="0.001"
