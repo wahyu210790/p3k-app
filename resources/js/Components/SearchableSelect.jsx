@@ -98,28 +98,23 @@ export default function SearchableSelect({
                     disabled ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
             >
-                <div className="flex-1 truncate text-left">
+                <div className="flex-1 text-left min-w-0 pr-1">
                     {selectedOption ? (
-                        <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-white truncate">{selectedOption.label}</span>
-                            {selectedOption.sublabel && (
-                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-700/80 text-amber-400 shrink-0">
-                                    {selectedOption.sublabel}
-                                </span>
-                            )}
+                        <div className="font-medium text-white text-xs sm:text-sm whitespace-normal leading-snug break-words">
+                            {selectedOption.label}
                         </div>
                     ) : (
-                        <span className="text-slate-500 italic">{placeholder}</span>
+                        <span className="text-slate-500 italic text-xs sm:text-sm truncate block">{placeholder}</span>
                     )}
                 </div>
                 <ChevronUpDownIcon className="w-4 h-4 text-slate-400 shrink-0" />
             </div>
 
-            {/* Menu Dropdown Pencarian */}
+            {/* Menu Dropdown Pencarian - Dibuat Lebih Lebar (min-w-[340px]) & Stacked */}
             {isOpen && (
-                <div className="absolute left-0 right-0 mt-1.5 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute left-0 mt-1.5 min-w-[340px] w-full max-w-xl bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     {/* Kotak Pencarian */}
-                    <div className="p-2 border-b border-slate-700/80 bg-slate-900/90 sticky top-0 z-10 flex items-center gap-2">
+                    <div className="p-2 border-b border-slate-700/80 bg-slate-900/95 sticky top-0 z-10 flex items-center gap-2">
                         <MagnifyingGlassIcon className="w-4 h-4 text-amber-400 shrink-0 ml-1" />
                         <input
                             ref={inputRef}
@@ -151,7 +146,7 @@ export default function SearchableSelect({
                                         key={opt.value}
                                         onClick={() => handleSelect(opt.value)}
                                         onMouseEnter={() => setHighlightedIndex(idx)}
-                                        className={`px-3.5 py-2.5 text-xs sm:text-sm cursor-pointer transition-colors flex items-center justify-between gap-3 ${
+                                        className={`px-3.5 py-3 text-xs sm:text-sm cursor-pointer transition-colors flex items-start justify-between gap-3 ${
                                             isHighlighted
                                                 ? 'bg-amber-500/20 text-white'
                                                 : isSelected
@@ -160,26 +155,26 @@ export default function SearchableSelect({
                                         }`}
                                     >
                                         <div className="flex-1 min-w-0">
-                                            <p className={`truncate ${isSelected || isHighlighted ? 'font-semibold text-white' : 'text-slate-200'}`}>
+                                            <p className={`whitespace-normal leading-relaxed ${isSelected || isHighlighted ? 'font-bold text-white' : 'text-slate-200'}`}>
                                                 {opt.label}
                                             </p>
-                                        </div>
-                                        <div className="flex items-center gap-2 shrink-0">
                                             {opt.sublabel && (
-                                                <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${
-                                                    isHighlighted
-                                                        ? 'bg-amber-500/30 text-amber-300 font-bold'
-                                                        : isSelected
-                                                        ? 'bg-amber-500/20 text-amber-400 font-bold'
-                                                        : 'bg-slate-700/80 text-slate-400'
-                                                }`}>
-                                                    {opt.sublabel}
-                                                </span>
-                                            )}
-                                            {isSelected && (
-                                                <CheckIcon className="w-4 h-4 text-amber-400 shrink-0" />
+                                                <div className="mt-1.5 flex items-center">
+                                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded shadow-sm ${
+                                                        isHighlighted
+                                                            ? 'bg-amber-500/30 text-amber-200 border border-amber-500/30'
+                                                            : isSelected
+                                                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/20'
+                                                            : 'bg-slate-900/80 text-amber-400 border border-slate-700/60'
+                                                    }`}>
+                                                        📦 {opt.sublabel}
+                                                    </span>
+                                                </div>
                                             )}
                                         </div>
+                                        {isSelected && (
+                                            <CheckIcon className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                                        )}
                                     </li>
                                 );
                             })
