@@ -51,7 +51,8 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
+                            <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
+                                    <th className="text-left px-4 py-3">SKU</th>
                                     <th className="text-left px-4 py-3">Bahan Baku</th>
                                     <th className="text-right px-4 py-3">Stok</th>
                                     <th className="text-right px-4 py-3">Min Stok</th>
@@ -63,12 +64,18 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                             <tbody className="divide-y divide-slate-700/30">
                                 {bahan_baku.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
+                                        <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
                                             Tidak ada bahan baku
                                         </td>
                                     </tr>
                                 ) : bahan_baku.map(b => (
                                     <tr key={b.id} className="hover:bg-slate-800/40 transition-colors">
+                                        <td className="px-4 py-3">
+                                            {b.sku
+                                                ? <span className="font-mono text-xs font-semibold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-md">{b.sku}</span>
+                                                : <span className="text-xs text-slate-600 italic">—</span>
+                                            }
+                                        </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 {b.is_stok_rendah && (

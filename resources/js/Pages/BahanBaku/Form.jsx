@@ -12,6 +12,7 @@ const Field = ({ label, error, children }) => (
 export default function BahanBakuForm({ bahan_baku, satuan_options }) {
     const isEdit = !!bahan_baku;
     const { data, setData, post, put, processing, errors } = useForm({
+        sku:            bahan_baku?.sku ?? '',
         nama:           bahan_baku?.nama ?? '',
         satuan:         bahan_baku?.satuan ?? 'pcs',
         stok_minimum:   bahan_baku?.stok_minimum ?? 0,
@@ -37,6 +38,11 @@ export default function BahanBakuForm({ bahan_baku, satuan_options }) {
                 </div>
 
                 <form onSubmit={submit} className="bg-slate-900/60 rounded-2xl border border-slate-700/50 p-6 space-y-5">
+                    <Field label="SKU (Kode Bahan Baku)" error={errors.sku}>
+                        <input type="text" value={data.sku} onChange={e => setData('sku', e.target.value.toUpperCase())}
+                            className={inputClass} placeholder="Contoh: BB-001 atau MIE-GRG" />
+                    </Field>
+
                     <Field label="Nama Bahan Baku" error={errors.nama}>
                         <input type="text" value={data.nama} onChange={e => setData('nama', e.target.value)}
                             className={inputClass} placeholder="Contoh: Mie Instan" />

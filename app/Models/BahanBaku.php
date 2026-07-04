@@ -10,7 +10,7 @@ class BahanBaku extends Model
     protected $table = 'bahan_baku';
 
     protected $fillable = [
-        'nama', 'satuan', 'stok_saat_ini', 'stok_minimum',
+        'sku', 'nama', 'satuan', 'stok_saat_ini', 'stok_minimum',
         'is_rokok', 'isi_per_bungkus', 'is_active',
     ];
 

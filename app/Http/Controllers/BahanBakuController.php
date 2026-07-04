@@ -23,11 +23,13 @@ class BahanBakuController extends Controller
             )
             ->when($request->get('search'), fn($q, $s) =>
                 $q->where('nama', 'like', "%{$s}%")
+                  ->orWhere('sku', 'like', "%{$s}%")
             )
             ->when(!$request->get('semua'), fn($q) => $q->where('is_active', true))
             ->get()
             ->map(fn($b) => [
                 'id'             => $b->id,
+                'sku'            => $b->sku,
                 'nama'           => $b->nama,
                 'satuan'         => $b->satuan,
                 'stok_saat_ini'  => (float) $b->stok_saat_ini,
@@ -57,6 +59,7 @@ class BahanBakuController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'sku'            => 'required|string|max:50|unique:bahan_baku,sku',
             'nama'           => 'required|string|max:100|unique:bahan_baku,nama',
             'satuan'         => 'required|string',
             'stok_minimum'   => 'required|numeric|min:0',
@@ -85,6 +88,7 @@ class BahanBakuController extends Controller
     public function update(Request $request, BahanBaku $bahanBaku): RedirectResponse
     {
         $validated = $request->validate([
+            'sku'            => 'required|string|max:50|unique:bahan_baku,sku,' . $bahanBaku->id,
             'nama'           => 'required|string|max:100|unique:bahan_baku,nama,' . $bahanBaku->id,
             'satuan'         => 'required|string',
             'stok_minimum'   => 'required|numeric|min:0',
