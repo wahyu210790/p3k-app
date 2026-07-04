@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\BahanBaku;
+use App\Models\Supplier;
+use App\Services\InventoryService;
+use App\Services\TransactionService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PembelianController extends Controller
+{
+    public function __construct(
+        private readonly TransactionService $transactionService,
+        private readonly InventoryService   $inventoryService
+    ) {}
+
+    public function index(Request $request): Response
+    {
+        $pembelian = \App\Models\Pembelian::with('supplier:id,nama', 'user:id,name')
+            ->when($request->get('supplier_id'), fn($q, $v) => $q->where('supplier_id', $v))
+            ->when($request->get('status'), fn($q, $v) => $q->where('status_pembayaran', $v))
+            ->when($request->get('dari'), fn($q, $v) => $q->whereDate('tanggal_pembelian', '>=', $v))
+            ->when($request->get('sampai'), fn($q, $v) => $q->whereDate('tanggal_pembelian', '<=', $v))
+            ->latest('tanggal_pembelian')
+            ->paginate(20)
+            ->withQueryString();
+
+        return Inertia::render('Pembelian/Index', [
+            'pembelian' => $pembelian,
+            'suppliers' => Supplier::where('is_active', true)->get(['id', 'nama']),
+            'filters'   => $request->only(['supplier_id', 'status', 'dari', 'sampai']),
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Pembelian/Create', [
+            'suppliers'   => Supplier::where('is_active', true)->get(['id', 'nama', 'telepon']),
+            'bahan_baku'  => BahanBaku::where('is_active', true)->get(['id', 'nama', 'satuan', 'stok_saat_ini']),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'supplier_id'            => 'nullable|exists:supplier,id',
+            'nomor_faktur'           => 'nullable|string|max:50',
+            'tanggal_pembelian'      => 'required|date',
+            'jumlah_bayar'           => 'required|numeric|min:0',
+            'catatan'                => 'nullable|string|max:500',
+            'items'                  => 'required|array|min:1',
+            'items.*.bahan_baku_id'  => 'required|exists:bahan_baku,id',
+            'items.*.jumlah'         => 'required|numeric|min:0.001',
+            'items.*.harga_satuan'   => 'required|numeric|min:1',
+        ]);
+
+        try {
+            $pembelian = $this->transactionService->prosesPembelian(auth()->id(), $validated);
+            return redirect()->route('pembelian.show', $pembelian->id)
+                ->with('success', 'Pembelian berhasil dicatat.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['message' => $e->getMessage()])->withInput();
+        }
+    }
+
+    public function show(\App\Models\Pembelian $pembelian): Response
+    {
+        return Inertia::render('Pembelian/Show', [
+            'pembelian' => $pembelian->load(
+                'supplier', 'user:id,name',
+                'detailPembelian.bahanBaku',
+                'hutangSupplier'
+            ),
+        ]);
+    }
+}
