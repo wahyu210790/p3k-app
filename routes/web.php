@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/pembelian',              [PembelianController::class, 'store']  )->name('pembelian.store');
         Route::get('/pembelian/{pembelian}',   [PembelianController::class, 'show']   )->name('pembelian.show');
         Route::delete('/pembelian/{pembelian}',[PembelianController::class, 'destroy'])->name('pembelian.destroy');
+        Route::delete('/pembelian/{pembelian}/item/{detailPembelian}', [PembelianController::class, 'destroyItem'])->name('pembelian.destroy-item');
 
         // ── Keuangan ─────────────────────────────────────────────────────────
         Route::get('/pengeluaran',        [PengeluaranController::class, 'index'] )->name('pengeluaran.index');

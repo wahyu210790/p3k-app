@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BahanBaku;
+use App\Models\DetailPembelian;
 use App\Models\FifoBatch;
 use App\Models\Supplier;
 use App\Services\InventoryService;
@@ -132,6 +133,90 @@ class PembelianController extends Controller
                 ->with('success', 'Pembelian berhasil dihapus dan stok telah dikembalikan.');
         } catch (\Exception $e) {
             return back()->withErrors(['message' => 'Gagal menghapus: ' . $e->getMessage()]);
+        }
+    }
+
+    public function destroyItem(\App\Models\Pembelian $pembelian, \App\Models\DetailPembelian $detailPembelian): RedirectResponse
+    {
+        if ((int) $detailPembelian->pembelian_id !== (int) $pembelian->id) {
+            abort(404);
+        }
+
+        // Jika ini adalah item terakhir/satu-satunya, hapus seluruh pembelian
+        if ($pembelian->detailPembelian()->count() <= 1) {
+            return $this->destroy($pembelian);
+        }
+
+        // Cek proteksi FIFO: pastikan batch untuk item bahan baku ini belum dikonsumsi
+        $batches = FifoBatch::where('pembelian_id', $pembelian->id)
+                            ->where('bahan_baku_id', $detailPembelian->bahan_baku_id)
+                            ->get();
+
+        foreach ($batches as $batch) {
+            if ((float) $batch->jumlah_sisa < (float) $batch->jumlah_awal) {
+                $sudahTerpakai = (float) $batch->jumlah_awal - (float) $batch->jumlah_sisa;
+                $namaBahan = optional($detailPembelian->bahanBaku)->nama ?? 'bahan baku';
+                return back()->withErrors([
+                    'message' => "Tidak dapat menghapus item ini. Stok '{$namaBahan}' dari pembelian ini "
+                        . "sebanyak {$sudahTerpakai} sudah dikonsumsi untuk penjualan.",
+                ]);
+            }
+        }
+
+        try {
+            DB::transaction(function () use ($pembelian, $detailPembelian, $batches) {
+                // 1. Rollback stok bahan baku & hapus batch FIFO item ini
+                foreach ($batches as $batch) {
+                    $bahanBaku = BahanBaku::find($batch->bahan_baku_id);
+                    if ($bahanBaku) {
+                        $bahanBaku->decrement('stok_saat_ini', (float) $batch->jumlah_awal);
+                    }
+                    $batch->delete();
+                }
+
+                // 2. Hitung subtotal yang dihapus
+                $subtotalDihapus = (float) $detailPembelian->subtotal;
+
+                // 3. Hapus detail pembelian
+                $detailPembelian->delete();
+
+                // 4. Update total_harga pembelian
+                $newTotalHarga = max(0, (float) $pembelian->total_harga - $subtotalDihapus);
+                $pembelian->total_harga = $newTotalHarga;
+
+                // 5. Sesuaikan jumlah_bayar jika melebihi total_harga baru
+                if ((float) $pembelian->jumlah_bayar > $newTotalHarga) {
+                    $pembelian->jumlah_bayar = $newTotalHarga;
+                }
+
+                // 6. Update status_pembayaran
+                $statusPembayaran = match (true) {
+                    $pembelian->jumlah_bayar >= $newTotalHarga => 'lunas',
+                    $pembelian->jumlah_bayar > 0 => 'sebagian',
+                    default => 'belum_bayar',
+                };
+                $pembelian->status_pembayaran = $statusPembayaran;
+                $pembelian->save();
+
+                // 7. Sesuaikan HutangSupplier jika ada
+                if ($pembelian->hutangSupplier) {
+                    $sisaHutangBaru = $newTotalHarga - $pembelian->jumlah_bayar;
+                    if ($sisaHutangBaru <= 0 || $statusPembayaran === 'lunas') {
+                        $pembelian->hutangSupplier->delete();
+                    } else {
+                        $pembelian->hutangSupplier->update([
+                            'jumlah_hutang' => $newTotalHarga,
+                            'sisa_hutang'   => $sisaHutangBaru,
+                            'status'        => 'belum_lunas',
+                        ]);
+                    }
+                }
+            });
+
+            return redirect()->route('pembelian.show', $pembelian->id)
+                ->with('success', 'Item berhasil dihapus dari faktur pembelian dan stok telah dikembalikan.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['message' => 'Gagal menghapus item: ' . $e->getMessage()]);
         }
     }
 }

@@ -7,6 +7,7 @@ import { useState } from 'react';
 export default function PembelianShow({ pembelian }) {
     const { errors } = usePage().props;
     const [showConfirm, setShowConfirm] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
     const { delete: destroy, processing } = useForm();
 
     const handlePrint = () => window.print();
@@ -15,6 +16,14 @@ export default function PembelianShow({ pembelian }) {
         destroy(route('pembelian.destroy', pembelian.id), {
             onSuccess: () => setShowConfirm(false),
             onError: () => setShowConfirm(false),
+        });
+    };
+
+    const handleDeleteItem = () => {
+        if (!itemToDelete) return;
+        destroy(route('pembelian.destroy-item', [pembelian.id, itemToDelete.id]), {
+            onSuccess: () => setItemToDelete(null),
+            onError: () => setItemToDelete(null),
         });
     };
 
@@ -136,6 +145,7 @@ export default function PembelianShow({ pembelian }) {
                                     <th className="text-right py-3 px-2">Qty Restok</th>
                                     <th className="text-right py-3 px-2">Harga Satuan</th>
                                     <th className="text-right py-3 px-2">Subtotal Tagihan</th>
+                                    <th className="text-center py-3 px-2 print:hidden">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800 print:divide-slate-200">
@@ -153,6 +163,15 @@ export default function PembelianShow({ pembelian }) {
                                         </td>
                                         <td className="py-3 px-2 text-right font-bold text-amber-400 print:text-slate-900">
                                             {rupiah(detail.subtotal_tagihan)}
+                                        </td>
+                                        <td className="py-3 px-2 text-center print:hidden">
+                                            <button
+                                                onClick={() => setItemToDelete(detail)}
+                                                className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg border border-red-500/20 hover:border-red-500/40 transition-all"
+                                                title="Hapus item ini"
+                                            >
+                                                <TrashIcon className="w-4 h-4 mx-auto" />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -242,6 +261,65 @@ export default function PembelianShow({ pembelian }) {
                                 ) : (
                                     <>
                                         <TrashIcon className="w-4 h-4" /> Ya, Hapus
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Konfirmasi Hapus Item */}
+            {itemToDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        onClick={() => !processing && setItemToDelete(null)}
+                    />
+                    {/* Dialog */}
+                    <div className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 w-full max-w-md">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                                <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+                            </div>
+                            <div>
+                                <h2 className="font-bold text-white text-base">Hapus Item Pembelian?</h2>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    {itemToDelete.bahan_baku?.nama || 'Item'} ({itemToDelete.jumlah} {itemToDelete.bahan_baku?.satuan})
+                                </p>
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-300 mb-2">
+                            Tindakan ini akan <span className="text-red-400 font-semibold">menghapus item ini</span> dari faktur pembelian dan mengembalikan stok bahan baku terkait.
+                        </p>
+                        <p className="text-xs text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mb-6">
+                            ⚠️ Jika stok dari item ini sudah digunakan untuk penjualan, penghapusan akan ditolak otomatis.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setItemToDelete(null)}
+                                disabled={processing}
+                                className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-sm rounded-xl border border-slate-700 transition-all disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleDeleteItem}
+                                disabled={processing}
+                                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {processing ? (
+                                    <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                        </svg>
+                                        Menghapus...
+                                    </>
+                                ) : (
+                                    <>
+                                        <TrashIcon className="w-4 h-4" /> Ya, Hapus Item
                                     </>
                                 )}
                             </button>

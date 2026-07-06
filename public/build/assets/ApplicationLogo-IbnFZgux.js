@@ -1,1 +1,0 @@
-import{t as e}from"./app-DoLLQSEc.js";var t=e();function n(e){return(0,t.jsx)(`img`,{...e,src:`/images/logo.png`,alt:`WARMINDO P3K Logo`,className:e.className||`w-12 h-12 object-contain`})}export{n as t};
