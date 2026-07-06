@@ -1,23 +1,24 @@
 import AppLayout from '@/Layouts/AppLayout';
 import { rupiah, tanggalIndo } from '@/lib/utils';
 import { Link, router } from '@inertiajs/react';
-import { PlusIcon, EyeIcon, TruckIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, EyeIcon, TruckIcon, DocumentTextIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useSortableData } from '@/lib/sort';
 import SortableHeader from '@/Components/SortableHeader';
 
-export default function PembelianIndex({ pembelian, suppliers, filters }) {
+export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
     const { items: sortedPembelian, sortConfig, requestSort } = useSortableData(pembelian.data);
-    const [supplierId, setSupplierId] = useState(filters.supplier_id ?? '');
-    const [status, setStatus] = useState(filters.status ?? '');
-    const [dari, setDari] = useState(filters.dari ?? '');
-    const [sampai, setSampai] = useState(filters.sampai ?? '');
+    const [search, setSearch] = useState(filters?.search ?? '');
+    const [supplierId, setSupplierId] = useState(filters?.supplier_id ?? '');
+    const [status, setStatus] = useState(filters?.status ?? '');
+    const [dari, setDari] = useState(filters?.dari ?? '');
+    const [sampai, setSampai] = useState(filters?.sampai ?? '');
 
     const handleFilter = (e) => {
         e.preventDefault();
         router.get(
             route('pembelian.index'),
-            { supplier_id: supplierId, status, dari, sampai },
+            { search, supplier_id: supplierId, status, dari, sampai },
             { preserveState: true }
         );
     };
@@ -51,6 +52,20 @@ export default function PembelianIndex({ pembelian, suppliers, filters }) {
 
                 {/* Filter Bar */}
                 <form onSubmit={handleFilter} className="bg-slate-900/60 rounded-2xl border border-slate-700/50 p-4 mb-6 flex flex-wrap gap-3 items-end">
+                    <div className="w-full sm:w-auto sm:flex-1 min-w-[200px]">
+                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Cari Faktur / Item</label>
+                        <div className="relative">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="No. Faktur / Nama bahan baku..."
+                                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                            />
+                        </div>
+                    </div>
+
                     <div className="flex-1 min-w-[160px]">
                         <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Supplier</label>
                         <select
@@ -106,11 +121,11 @@ export default function PembelianIndex({ pembelian, suppliers, filters }) {
                         >
                             Filter
                         </button>
-                        {(supplierId || status || dari || sampai) && (
+                        {(search || supplierId || status || dari || sampai) && (
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setSupplierId(''); setStatus(''); setDari(''); setSampai('');
+                                    setSearch(''); setSupplierId(''); setStatus(''); setDari(''); setSampai('');
                                     router.get(route('pembelian.index'));
                                 }}
                                 className="px-3 py-2 bg-slate-800 hover:bg-red-900/40 text-slate-400 hover:text-red-400 text-xs rounded-xl transition-colors"

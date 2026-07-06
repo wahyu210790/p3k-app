@@ -27,6 +27,15 @@ class PembelianController extends Controller
             ->when($request->get('status'), fn($q, $v) => $q->where('status_pembayaran', $v))
             ->when($request->get('dari'), fn($q, $v) => $q->whereDate('tanggal_pembelian', '>=', $v))
             ->when($request->get('sampai'), fn($q, $v) => $q->whereDate('tanggal_pembelian', '<=', $v))
+            ->when($request->get('search'), function ($q, $s) {
+                $q->where(function ($query) use ($s) {
+                    $query->where('nomor_faktur', 'like', "%{$s}%")
+                          ->orWhereHas('detailPembelian.bahanBaku', function ($qBahan) use ($s) {
+                              $qBahan->where('nama', 'like', "%{$s}%")
+                                     ->orWhere('sku', 'like', "%{$s}%");
+                          });
+                });
+            })
             ->latest('tanggal_pembelian')
             ->paginate(20)
             ->withQueryString();
@@ -34,7 +43,7 @@ class PembelianController extends Controller
         return Inertia::render('Pembelian/Index', [
             'pembelian' => $pembelian,
             'suppliers' => Supplier::where('is_active', true)->get(['id', 'nama']),
-            'filters'   => $request->only(['supplier_id', 'status', 'dari', 'sampai']),
+            'filters'   => $request->only(['supplier_id', 'status', 'dari', 'sampai', 'search']),
         ]);
     }
 
