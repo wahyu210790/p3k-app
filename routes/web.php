@@ -74,10 +74,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('promo',      PromoController::class);
 
         // ── Pembelian ────────────────────────────────────────────────────────
-        Route::get('/pembelian',               [PembelianController::class, 'index'] )->name('pembelian.index');
-        Route::get('/pembelian/buat',          [PembelianController::class, 'create'])->name('pembelian.create');
-        Route::post('/pembelian',              [PembelianController::class, 'store'] )->name('pembelian.store');
-        Route::get('/pembelian/{pembelian}',   [PembelianController::class, 'show']  )->name('pembelian.show');
+        Route::get('/pembelian',               [PembelianController::class, 'index']  )->name('pembelian.index');
+        Route::get('/pembelian/buat',          [PembelianController::class, 'create'] )->name('pembelian.create');
+        Route::post('/pembelian',              [PembelianController::class, 'store']  )->name('pembelian.store');
+        Route::get('/pembelian/{pembelian}',   [PembelianController::class, 'show']   )->name('pembelian.show');
+        Route::delete('/pembelian/{pembelian}',[PembelianController::class, 'destroy'])->name('pembelian.destroy');
 
         // ── Keuangan ─────────────────────────────────────────────────────────
         Route::get('/pengeluaran',        [PengeluaranController::class, 'index'] )->name('pengeluaran.index');

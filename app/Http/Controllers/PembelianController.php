@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\BahanBaku;
+use App\Models\FifoBatch;
 use App\Models\Supplier;
 use App\Services\InventoryService;
 use App\Services\TransactionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -76,5 +78,51 @@ class PembelianController extends Controller
                 'hutangSupplier'
             ),
         ]);
+    }
+
+    public function destroy(\App\Models\Pembelian $pembelian): RedirectResponse
+    {
+        // Cek proteksi FIFO: pastikan tidak ada batch yang sudah dikonsumsi
+        $batches = FifoBatch::where('pembelian_id', $pembelian->id)->get();
+
+        foreach ($batches as $batch) {
+            if ((float) $batch->jumlah_sisa < (float) $batch->jumlah_awal) {
+                $sudahTerpakai = (float) $batch->jumlah_awal - (float) $batch->jumlah_sisa;
+                $namaBahan = optional($batch->bahanBaku)->nama ?? 'bahan baku';
+                return back()->withErrors([
+                    'message' => "Tidak dapat menghapus. Stok dari pembelian ini sudah terpakai: "
+                        . "{$namaBahan} sebanyak {$sudahTerpakai} sudah dikonsumsi untuk penjualan.",
+                ]);
+            }
+        }
+
+        try {
+            DB::transaction(function () use ($pembelian, $batches) {
+                // 1. Rollback stok bahan baku & hapus batch FIFO
+                foreach ($batches as $batch) {
+                    $bahanBaku = BahanBaku::find($batch->bahan_baku_id);
+                    if ($bahanBaku) {
+                        $bahanBaku->decrement('stok_saat_ini', (float) $batch->jumlah_awal);
+                    }
+                    $batch->delete();
+                }
+
+                // 2. Hapus hutang supplier terkait (jika ada)
+                if ($pembelian->hutangSupplier) {
+                    $pembelian->hutangSupplier->delete();
+                }
+
+                // 3. Hapus detail pembelian
+                $pembelian->detailPembelian()->delete();
+
+                // 4. Hapus header pembelian
+                $pembelian->delete();
+            });
+
+            return redirect()->route('pembelian.index')
+                ->with('success', 'Pembelian berhasil dihapus dan stok telah dikembalikan.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['message' => 'Gagal menghapus: ' . $e->getMessage()]);
+        }
     }
 }
