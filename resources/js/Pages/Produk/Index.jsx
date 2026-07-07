@@ -10,6 +10,7 @@ const kategoriBadge = {
     Makanan:  'bg-orange-900/40 text-orange-300 border border-orange-700/40',
     Minuman:  'bg-blue-900/40 text-blue-300 border border-blue-700/40',
     Rokok:    'bg-red-900/40 text-red-300 border border-red-700/40',
+    'Add-On / Topping': 'bg-purple-900/40 text-purple-300 border border-purple-700/40',
     Lainnya:  'bg-slate-700 text-slate-300 border border-slate-600',
 };
 
@@ -93,7 +94,7 @@ export default function ProdukIndex({ produk, filters = {} }) {
                     <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
                         {/* Kategori Tabs */}
                         <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-                            {['', 'Makanan', 'Minuman', 'Rokok', 'Lainnya'].map((k) => {
+                            {['', 'Makanan', 'Minuman', 'Rokok', 'Add-On / Topping', 'Lainnya'].map((k) => {
                                 const label = k === '' ? 'Semua' : k;
                                 const isActive = activeKategori === k;
                                 return (

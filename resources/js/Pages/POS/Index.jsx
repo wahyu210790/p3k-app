@@ -180,7 +180,19 @@ export default function POSIndex({ produk_per_kategori }) {
         return Object.values(produk_per_kategori).flat();
     }, [produk_per_kategori]);
 
-    const kategoriList = ['Semua', ...Object.keys(produk_per_kategori)];
+    const kategoriList = useMemo(() => {
+        const defaultOrder = ['Makanan', 'Minuman', 'Rokok', 'Add-On / Topping', 'Lainnya'];
+        const keys = Object.keys(produk_per_kategori);
+        const sorted = keys.sort((a, b) => {
+            const idxA = defaultOrder.indexOf(a);
+            const idxB = defaultOrder.indexOf(b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return a.localeCompare(b);
+        });
+        return ['Semua', ...sorted];
+    }, [produk_per_kategori]);
 
     const produkFiltered = useMemo(() => {
         let list = kategoriAktif === 'Semua' ? semuaProduk : (produk_per_kategori[kategoriAktif] ?? []);

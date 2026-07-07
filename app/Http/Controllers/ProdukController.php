@@ -41,7 +41,7 @@ class ProdukController extends Controller
     {
         return Inertia::render('Produk/Form', [
             'bahan_baku'      => BahanBaku::where('is_active', true)->get(['id', 'nama', 'satuan']),
-            'kategori_options' => ['Makanan', 'Minuman', 'Rokok', 'Lainnya'],
+            'kategori_options' => ['Makanan', 'Minuman', 'Rokok', 'Add-On / Topping', 'Lainnya'],
         ]);
     }
 
@@ -49,7 +49,7 @@ class ProdukController extends Controller
     {
         $validated = $request->validate([
             'nama'         => 'required|string|max:100',
-            'kategori'     => 'required|in:Makanan,Minuman,Rokok,Lainnya',
+            'kategori'     => 'required|in:Makanan,Minuman,Rokok,Add-On / Topping,Lainnya',
             'harga_jual'   => 'required|numeric|min:1',
             'has_resep'    => 'boolean',
             'foto'         => 'nullable|image|max:2048',
@@ -91,7 +91,7 @@ class ProdukController extends Controller
         return Inertia::render('Produk/Form', [
             'produk'          => $produk->load('detailResep.bahanBaku'),
             'bahan_baku'      => BahanBaku::where('is_active', true)->get(['id', 'nama', 'satuan']),
-            'kategori_options' => ['Makanan', 'Minuman', 'Rokok', 'Lainnya'],
+            'kategori_options' => ['Makanan', 'Minuman', 'Rokok', 'Add-On / Topping', 'Lainnya'],
         ]);
     }
 
@@ -99,7 +99,7 @@ class ProdukController extends Controller
     {
         $validated = $request->validate([
             'nama'       => 'required|string|max:100',
-            'kategori'   => 'required|in:Makanan,Minuman,Rokok,Lainnya',
+            'kategori'   => 'required|in:Makanan,Minuman,Rokok,Add-On / Topping,Lainnya',
             'harga_jual' => 'required|numeric|min:1',
             'has_resep'  => 'boolean',
             'is_active'  => 'boolean',
