@@ -142,8 +142,7 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
-                                    <SortableHeader label="Faktur / Tanggal" sortKey="nomor_faktur" currentSort={sortConfig} onSort={requestSort} align="left" />
-                                    <SortableHeader label="Supplier" sortKey="supplier.nama" currentSort={sortConfig} onSort={requestSort} align="left" />
+                                    <SortableHeader label="Tanggal Pembelian" sortKey="tanggal_pembelian" currentSort={sortConfig} onSort={requestSort} align="left" />
                                     <th className="text-left px-5 py-3.5">Item Dibeli</th>
                                     <SortableHeader label="Total Tagihan" sortKey="total_harga" currentSort={sortConfig} onSort={requestSort} align="right" />
                                     <SortableHeader label="Dibayar" sortKey="jumlah_bayar" currentSort={sortConfig} onSort={requestSort} align="right" />
@@ -155,28 +154,20 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                             <tbody className="divide-y divide-slate-700/30">
                                 {sortedPembelian.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} className="px-5 py-16 text-center text-slate-500">
+                                        <td colSpan={7} className="px-5 py-16 text-center text-slate-500">
                                             Belum ada catatan pembelian pada filter ini.
                                         </td>
                                     </tr>
                                 ) : (
                                     sortedPembelian.map((p) => (
                                         <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                                            <td className="px-5 py-3.5">
+                                            <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-2.5">
                                                     <DocumentTextIcon className="w-4 h-4 text-amber-400 shrink-0" />
-                                                    <div>
-                                                        <p className="font-semibold text-white">{p.nomor_faktur || `PB-${p.id}`}</p>
-                                                        <p className="text-xs text-slate-500">{tanggalIndo(p.tanggal_pembelian)}</p>
-                                                    </div>
+                                                    <span className="font-semibold text-white">{tanggalIndo(p.tanggal_pembelian)}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-3.5">
-                                                <span className="font-medium text-slate-300">
-                                                    {p.supplier?.nama || 'Tanpa Supplier (Umum)'}
-                                                </span>
-                                            </td>
-                                            <td className="px-5 py-3.5 max-w-[280px]">
+                                            <td className="px-5 py-3.5 max-w-[360px]">
                                                 <div
                                                     className="flex flex-wrap gap-1.5"
                                                     title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${d.jumlah} ${d.bahan_baku?.satuan})`).join(', ')}
