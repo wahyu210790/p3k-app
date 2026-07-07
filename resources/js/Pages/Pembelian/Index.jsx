@@ -178,27 +178,20 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                                                     <span className="font-semibold text-white">{tanggalIndo(p.tanggal_pembelian)}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-3.5 max-w-[380px]">
+                                            <td className="px-5 py-3.5 max-w-2xl">
                                                 <div
                                                     className="flex flex-wrap gap-1.5"
                                                     title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${Number(d.jumlah).toLocaleString('id-ID')} ${d.bahan_baku?.satuan} - @ ${rupiah(d.harga_satuan)})`).join('\n')}
                                                 >
                                                     {p.detail_pembelian && p.detail_pembelian.length > 0 ? (
-                                                        <>
-                                                            {getPrioritizedItems(p.detail_pembelian).slice(0, 2).map((item, idx) => (
-                                                                <span key={idx} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700/80 text-slate-300 text-xs font-medium shadow-sm">
-                                                                    <span className="text-amber-400 font-semibold">{item.bahan_baku?.nama || 'Item'}</span>
-                                                                    <span className="text-slate-300 text-[11px] bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/50">
-                                                                        {Number(item.jumlah).toLocaleString('id-ID')} {item.bahan_baku?.satuan} • <span className="text-emerald-400 font-semibold">{rupiah(item.harga_satuan)}</span>
-                                                                    </span>
+                                                        getPrioritizedItems(p.detail_pembelian).map((item, idx) => (
+                                                            <span key={idx} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700/80 text-slate-300 text-xs font-medium shadow-sm">
+                                                                <span className="text-amber-400 font-semibold">{item.bahan_baku?.nama || 'Item'}</span>
+                                                                <span className="text-slate-300 text-[11px] bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/50">
+                                                                    {Number(item.jumlah).toLocaleString('id-ID')} {item.bahan_baku?.satuan} • <span className="text-emerald-400 font-semibold">{rupiah(item.harga_satuan)}</span>
                                                                 </span>
-                                                            ))}
-                                                            {p.detail_pembelian.length > 2 && (
-                                                                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-                                                                    +{p.detail_pembelian.length - 2} lagi
-                                                                </span>
-                                                            )}
-                                                        </>
+                                                            </span>
+                                                        ))
                                                     ) : (
                                                         <span className="text-xs text-slate-500 italic">Tidak ada item</span>
                                                     )}
