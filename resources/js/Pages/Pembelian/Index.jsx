@@ -144,7 +144,8 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                                 <tr className="border-b border-slate-700/50 text-xs text-slate-400 uppercase tracking-wider">
                                     <SortableHeader label="Faktur / Tanggal" sortKey="nomor_faktur" currentSort={sortConfig} onSort={requestSort} align="left" />
                                     <SortableHeader label="Supplier" sortKey="supplier.nama" currentSort={sortConfig} onSort={requestSort} align="left" />
-                                    <SortableHeader label="Total Tagihan" sortKey="total_tagihan" currentSort={sortConfig} onSort={requestSort} align="right" />
+                                    <th className="text-left px-5 py-3.5">Item Dibeli</th>
+                                    <SortableHeader label="Total Tagihan" sortKey="total_harga" currentSort={sortConfig} onSort={requestSort} align="right" />
                                     <SortableHeader label="Dibayar" sortKey="jumlah_bayar" currentSort={sortConfig} onSort={requestSort} align="right" />
                                     <SortableHeader label="Status" sortKey="status_pembayaran" currentSort={sortConfig} onSort={requestSort} align="center" />
                                     <SortableHeader label="Dicatat Oleh" sortKey="user.name" currentSort={sortConfig} onSort={requestSort} align="left" />
@@ -154,7 +155,7 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                             <tbody className="divide-y divide-slate-700/30">
                                 {sortedPembelian.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-5 py-16 text-center text-slate-500">
+                                        <td colSpan={8} className="px-5 py-16 text-center text-slate-500">
                                             Belum ada catatan pembelian pada filter ini.
                                         </td>
                                     </tr>
@@ -175,8 +176,32 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                                                     {p.supplier?.nama || 'Tanpa Supplier (Umum)'}
                                                 </span>
                                             </td>
+                                            <td className="px-5 py-3.5 max-w-[280px]">
+                                                <div
+                                                    className="flex flex-wrap gap-1.5"
+                                                    title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${d.jumlah} ${d.bahan_baku?.satuan})`).join(', ')}
+                                                >
+                                                    {p.detail_pembelian && p.detail_pembelian.length > 0 ? (
+                                                        <>
+                                                            {p.detail_pembelian.slice(0, 2).map((item, idx) => (
+                                                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-300 text-xs font-medium">
+                                                                    <span className="text-amber-400 font-semibold">{item.bahan_baku?.nama || 'Item'}</span>
+                                                                    <span className="text-slate-400 text-[11px]">({item.jumlah} {item.bahan_baku?.satuan})</span>
+                                                                </span>
+                                                            ))}
+                                                            {p.detail_pembelian.length > 2 && (
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+                                                                    +{p.detail_pembelian.length - 2} lagi
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-500 italic">Tidak ada item</span>
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td className="px-5 py-3.5 text-right font-bold text-white">
-                                                {rupiah(p.total_tagihan)}
+                                                {rupiah(p.total_tagihan || p.total_harga)}
                                             </td>
                                             <td className="px-5 py-3.5 text-right font-medium text-emerald-400">
                                                 {rupiah(p.jumlah_bayar)}

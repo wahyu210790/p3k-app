@@ -23,7 +23,7 @@ class PembelianController extends Controller
 
     public function index(Request $request): Response
     {
-        $pembelian = \App\Models\Pembelian::with('supplier:id,nama', 'user:id,name')
+        $pembelian = \App\Models\Pembelian::with('supplier:id,nama', 'user:id,name', 'detailPembelian.bahanBaku:id,nama,satuan')
             ->when($request->get('supplier_id'), fn($q, $v) => $q->where('supplier_id', $v))
             ->when($request->get('status'), fn($q, $v) => $q->where('status_pembayaran', $v))
             ->when($request->get('dari'), fn($q, $v) => $q->whereDate('tanggal_pembelian', '>=', $v))
