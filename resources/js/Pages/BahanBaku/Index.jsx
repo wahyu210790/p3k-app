@@ -138,7 +138,7 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                                     <tr key={b.id} className="hover:bg-slate-800/40 transition-colors">
                                         <td className="px-4 py-3">
                                             {b.sku
-                                                ? <span className="font-mono text-xs font-semibold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-md">{b.sku}</span>
+                                                ? <span className="font-mono text-sm font-extrabold tracking-wider text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 px-2.5 py-1 rounded-lg shadow-sm select-all inline-block">{b.sku}</span>
                                                 : <span className="text-xs text-slate-600 italic">—</span>
                                             }
                                         </td>
