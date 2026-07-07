@@ -23,6 +23,17 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
         );
     };
 
+    const getPrioritizedItems = (items) => {
+        if (!items || items.length === 0) return [];
+        if (!search) return items;
+        const lower = search.toLowerCase();
+        return [...items].sort((a, b) => {
+            const aMatch = (a.bahan_baku?.nama || '').toLowerCase().includes(lower) ? -1 : 1;
+            const bMatch = (b.bahan_baku?.nama || '').toLowerCase().includes(lower) ? -1 : 1;
+            return aMatch - bMatch;
+        });
+    };
+
     const statusBadge = (st) => {
         switch (st) {
             case 'lunas':
@@ -167,21 +178,23 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                                                     <span className="font-semibold text-white">{tanggalIndo(p.tanggal_pembelian)}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-5 py-3.5 max-w-[360px]">
+                                            <td className="px-5 py-3.5 max-w-[380px]">
                                                 <div
                                                     className="flex flex-wrap gap-1.5"
-                                                    title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${d.jumlah} ${d.bahan_baku?.satuan})`).join(', ')}
+                                                    title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${d.jumlah} ${d.bahan_baku?.satuan} - @ ${rupiah(d.harga_satuan)})`).join('\n')}
                                                 >
                                                     {p.detail_pembelian && p.detail_pembelian.length > 0 ? (
                                                         <>
-                                                            {p.detail_pembelian.slice(0, 2).map((item, idx) => (
-                                                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/90 border border-slate-700/60 text-slate-300 text-xs font-medium">
+                                                            {getPrioritizedItems(p.detail_pembelian).slice(0, 2).map((item, idx) => (
+                                                                <span key={idx} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700/80 text-slate-300 text-xs font-medium shadow-sm">
                                                                     <span className="text-amber-400 font-semibold">{item.bahan_baku?.nama || 'Item'}</span>
-                                                                    <span className="text-slate-400 text-[11px]">({item.jumlah} {item.bahan_baku?.satuan})</span>
+                                                                    <span className="text-slate-300 text-[11px] bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/50">
+                                                                        {item.jumlah} {item.bahan_baku?.satuan} • <span className="text-emerald-400 font-semibold">{rupiah(item.harga_satuan)}</span>
+                                                                    </span>
                                                                 </span>
                                                             ))}
                                                             {p.detail_pembelian.length > 2 && (
-                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+                                                                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
                                                                     +{p.detail_pembelian.length - 2} lagi
                                                                 </span>
                                                             )}
