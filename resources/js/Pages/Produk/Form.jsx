@@ -87,7 +87,7 @@ export default function ProdukForm({ produk, bahan_baku, kategori_options }) {
                                         onChange={e => setData('foto', e.target.files[0])}
                                         className="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 transition-all cursor-pointer" 
                                     />
-                                    <p className="text-[11px] text-slate-500 mt-1">Format: JPG, PNG, WEBP (Maks. 2MB).</p>
+                                    <p className="text-[11px] text-slate-500 mt-1">Format: JPG, PNG, WEBP (Maks. 10MB).</p>
                                 </div>
                             </div>
                         </Field>
