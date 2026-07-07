@@ -51,6 +51,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/pos/struk/{transaksi}', [POSController::class, 'struk'])->name('pos.struk');
         Route::get('/pos/riwayat',      [POSController::class, 'riwayat'])->name('pos.riwayat');
         Route::post('/pos/estimasi-hpp', [POSController::class, 'estimasiHPP'])->name('pos.estimasi-hpp');
+        Route::post('/pos/open-bill',                  [POSController::class, 'storeOpenBill']) ->name('pos.open-bill.store');
+        Route::put('/pos/open-bill/{openBill}',        [POSController::class, 'updateOpenBill'])->name('pos.open-bill.update');
+        Route::delete('/pos/open-bill/{openBill}',     [POSController::class, 'deleteOpenBill'])->name('pos.open-bill.destroy');
 
         // Non-Sales (jatah karyawan, rusak, dll.)
         Route::get('/non-sales',             [NonSalesController::class, 'index'] )->name('non-sales.index');

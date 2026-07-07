@@ -5,6 +5,7 @@ import { rupiah } from '@/lib/utils';
 import {
     PlusIcon, MinusIcon, TrashIcon, ShoppingCartIcon,
     MagnifyingGlassIcon, CheckIcon, XMarkIcon,
+    BookmarkIcon, ClipboardDocumentListIcon, ClockIcon,
 } from '@heroicons/react/24/outline';
 
 /* ── Komponen Kartu Produk ── */
@@ -167,14 +168,173 @@ function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
     );
 }
 
+/* ── Modal Simpan / Update Open Bill (Meja) ── */
+function ModalOpenBill({ initialData, total, itemCount, onClose, onSubmit, processing }) {
+    const [namaMeja, setNamaMeja] = useState(initialData?.nama_meja || '');
+    const [catatan, setCatatan] = useState(initialData?.catatan || '');
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-slate-900 rounded-2xl w-full max-w-sm border border-slate-700 shadow-2xl z-10">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+                    <h3 className="font-bold text-white text-lg">
+                        {initialData?.id ? 'Update Pesanan Meja' : 'Simpan ke Meja (Open Bill)'}
+                    </h3>
+                    <button onClick={onClose} className="text-slate-400 hover:text-white">
+                        <XMarkIcon className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="px-5 py-4 space-y-4">
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 text-center">
+                        <p className="text-xs text-amber-400 font-medium">TOTAL ESTIMASI</p>
+                        <p className="text-2xl font-black text-amber-400">{rupiah(total)}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{itemCount} item di keranjang</p>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                            Nomor Meja / Nama Pelanggan *
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="Misal: Meja 4 - Pak Budi"
+                            value={namaMeja}
+                            onChange={e => setNamaMeja(e.target.value)}
+                            className="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                            autoFocus
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                            Catatan Dapur / Pesanan (Opsional)
+                        </label>
+                        <textarea
+                            rows={2}
+                            placeholder="Misal: Pedas, jangan pakai daun bawang..."
+                            value={catatan}
+                            onChange={e => setCatatan(e.target.value)}
+                            className="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                        />
+                    </div>
+                </div>
+
+                <div className="px-5 pb-5 flex gap-3">
+                    <button onClick={onClose}
+                        className="flex-1 py-3 rounded-xl border border-slate-600 text-slate-300 font-semibold text-sm hover:bg-slate-800 transition-colors">
+                        Batal
+                    </button>
+                    <button
+                        onClick={() => onSubmit({ nama_meja: namaMeja, catatan })}
+                        disabled={processing || !namaMeja.trim()}
+                        className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                        {processing ? (
+                            <span className="animate-spin w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full" />
+                        ) : (
+                            <><BookmarkIcon className="w-4 h-4" /> {initialData?.id ? 'Update Meja' : 'Simpan Meja'}</>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ── Modal Daftar Meja Aktif ── */
+function ModalDaftarMeja({ openBills, onClose, onSelectBill, onDeleteBill }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-slate-900 rounded-2xl w-full max-w-2xl border border-slate-700 shadow-2xl z-10 flex flex-col max-h-[85vh]">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 shrink-0">
+                    <div className="flex items-center gap-2">
+                        <ClipboardDocumentListIcon className="w-5 h-5 text-amber-400" />
+                        <h3 className="font-bold text-white text-lg">Daftar Meja / Open Bill ({openBills.length})</h3>
+                    </div>
+                    <button onClick={onClose} className="text-slate-400 hover:text-white">
+                        <XMarkIcon className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="p-5 overflow-y-auto space-y-3 flex-1">
+                    {openBills.length === 0 ? (
+                        <div className="py-12 text-center text-slate-500">
+                            <ClipboardDocumentListIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm font-medium">Belum ada pesanan meja yang aktif</p>
+                            <p className="text-xs mt-1">Gunakan tombol "Simpan ke Meja" di keranjang saat ada pelanggan makan di tempat.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {openBills.map(bill => {
+                                const totalQty = bill.keranjang?.reduce((s, i) => s + i.qty, 0) || 0;
+                                return (
+                                    <div key={bill.id}
+                                        className="bg-slate-800/80 border border-slate-700 hover:border-amber-500/50 rounded-xl p-4 flex flex-col justify-between transition-all group">
+                                        <div>
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <h4 className="font-bold text-white text-base group-hover:text-amber-400 transition-colors">
+                                                    {bill.nama_meja}
+                                                </h4>
+                                                <span className="text-xs bg-amber-500/10 text-amber-400 font-semibold px-2 py-0.5 rounded-full border border-amber-500/20 shrink-0">
+                                                    {totalQty} item
+                                                </span>
+                                            </div>
+                                            <p className="text-xl font-black text-amber-400 mb-2">
+                                                {rupiah(bill.total_estimasi)}
+                                            </p>
+                                            {bill.catatan && (
+                                                <p className="text-xs text-slate-400 bg-slate-900/60 p-2 rounded-lg mb-3 italic border border-slate-700/50">
+                                                    "{bill.catatan}"
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-2 pt-3 border-t border-slate-700/60 mt-auto">
+                                            <button
+                                                onClick={() => onDeleteBill(bill)}
+                                                className="px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 text-xs font-semibold transition-colors flex items-center justify-center">
+                                                <TrashIcon className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => onSelectBill(bill)}
+                                                className="flex-1 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                                                📂 Buka & Tambah Item
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                <div className="px-5 py-3 border-t border-slate-700 bg-slate-900/50 flex justify-end shrink-0">
+                    <button onClick={onClose}
+                        className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /* ── Halaman Utama POS ── */
-export default function POSIndex({ produk_per_kategori }) {
+export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
     const [keranjang, setKeranjang] = useState([]);
     const [search, setSearch] = useState('');
     const [kategoriAktif, setKategoriAktif] = useState('Semua');
     const [showCheckout, setShowCheckout] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
+
+    // Open Bill state
+    const [activeOpenBill, setActiveOpenBill] = useState(null);
+    const [showModalOpenBill, setShowModalOpenBill] = useState(false);
+    const [showModalDaftarMeja, setShowModalDaftarMeja] = useState(false);
+    const [openBillProcessing, setOpenBillProcessing] = useState(false);
 
     const semuaProduk = useMemo(() => {
         return Object.values(produk_per_kategori).flat();
@@ -238,6 +398,54 @@ export default function POSIndex({ produk_per_kategori }) {
 
     const total = useMemo(() => keranjang.reduce((s, i) => s + i.harga_aktual * i.qty, 0), [keranjang]);
 
+    const handleSaveOpenBill = (data) => {
+        setOpenBillProcessing(true);
+        const payload = {
+            nama_meja: data.nama_meja,
+            catatan: data.catatan,
+            keranjang: keranjang,
+            total_estimasi: total,
+        };
+
+        if (activeOpenBill?.id) {
+            router.put(route('pos.open-bill.update', activeOpenBill.id), payload, {
+                onSuccess: () => {
+                    setKeranjang([]);
+                    setActiveOpenBill(null);
+                    setShowModalOpenBill(false);
+                },
+                onFinish: () => setOpenBillProcessing(false),
+            });
+        } else {
+            router.post(route('pos.open-bill.store'), payload, {
+                onSuccess: () => {
+                    setKeranjang([]);
+                    setShowModalOpenBill(false);
+                },
+                onFinish: () => setOpenBillProcessing(false),
+            });
+        }
+    };
+
+    const handleSelectBill = (bill) => {
+        setKeranjang(bill.keranjang || []);
+        setActiveOpenBill({ id: bill.id, nama_meja: bill.nama_meja, catatan: bill.catatan });
+        setShowModalDaftarMeja(false);
+    };
+
+    const handleDeleteBill = (bill) => {
+        if (confirm(`Hapus / Batal pesanan meja '${bill.nama_meja}'?`)) {
+            router.delete(route('pos.open-bill.destroy', bill.id), {
+                onSuccess: () => {
+                    if (activeOpenBill?.id === bill.id) {
+                        setActiveOpenBill(null);
+                        setKeranjang([]);
+                    }
+                }
+            });
+        }
+    };
+
     const handleSubmit = (metode, piutangData) => {
         setProcessing(true);
         router.post(route('pos.checkout'), {
@@ -248,9 +456,11 @@ export default function POSIndex({ produk_per_kategori }) {
             })),
             metode_pembayaran: metode,
             piutang_data: piutangData,
+            open_bill_id: activeOpenBill?.id || null,
         }, {
             onSuccess: () => {
                 setKeranjang([]);
+                setActiveOpenBill(null);
                 setShowCheckout(false);
             },
             onError: (e) => {
@@ -308,15 +518,40 @@ export default function POSIndex({ produk_per_kategori }) {
 
                 {/* ── Panel Keranjang (kanan/bawah) ── */}
                 <div className="lg:w-80 xl:w-96 flex flex-col bg-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden shrink-0">
-                    <div className="px-4 py-3 border-b border-slate-700/50 flex items-center gap-2">
-                        <ShoppingCartIcon className="w-5 h-5 text-amber-400" />
-                        <h2 className="font-bold text-white">Keranjang</h2>
-                        {keranjang.length > 0 && (
-                            <span className="ml-auto bg-amber-500 text-slate-900 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                                {keranjang.length}
-                            </span>
-                        )}
+                    <div className="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <ShoppingCartIcon className="w-5 h-5 text-amber-400" />
+                            <h2 className="font-bold text-white">Keranjang</h2>
+                            {keranjang.length > 0 && (
+                                <span className="bg-amber-500 text-slate-900 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                                    {keranjang.length}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Tombol Daftar Meja Aktif */}
+                        <button
+                            onClick={() => setShowModalDaftarMeja(true)}
+                            className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm">
+                            <ClipboardDocumentListIcon className="w-4 h-4" />
+                            <span>Meja Aktif ({open_bills.length})</span>
+                        </button>
                     </div>
+
+                    {/* Banner Jika Sedang Melayani Meja Aktif */}
+                    {activeOpenBill && (
+                        <div className="mx-4 mt-3 px-3 py-2.5 bg-amber-500/15 border border-amber-500/50 rounded-xl flex items-center justify-between gap-2 shadow-sm">
+                            <div className="min-w-0">
+                                <p className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Sedang Melayani:</p>
+                                <p className="text-sm font-black text-white truncate">{activeOpenBill.nama_meja}</p>
+                            </div>
+                            <button
+                                onClick={() => { setActiveOpenBill(null); setKeranjang([]); }}
+                                className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold shrink-0 border border-slate-600 transition-colors">
+                                Tutup / Lepas
+                            </button>
+                        </div>
+                    )}
 
                     {/* Error */}
                     {errors.message && (
@@ -348,8 +583,17 @@ export default function POSIndex({ produk_per_kategori }) {
                                 <span className="text-slate-400 text-sm">Total</span>
                                 <span className="text-xl font-black text-amber-400">{rupiah(total)}</span>
                             </div>
+
+                            {/* Tombol Simpan ke Meja (Open Bill) */}
+                            <button
+                                onClick={() => setShowModalOpenBill(true)}
+                                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 border border-amber-500/30 font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm">
+                                <BookmarkIcon className="w-4 h-4" />
+                                {activeOpenBill ? `Update Pesanan '${activeOpenBill.nama_meja}'` : '📌 Simpan ke Meja (Open Bill)'}
+                            </button>
+
                             <div className="flex gap-2">
-                                <button onClick={() => setKeranjang([])}
+                                <button onClick={() => { setKeranjang([]); setActiveOpenBill(null); }}
                                     className="px-3 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">
                                     <TrashIcon className="w-4 h-4" />
                                 </button>
@@ -372,6 +616,28 @@ export default function POSIndex({ produk_per_kategori }) {
                     onClose={() => setShowCheckout(false)}
                     onSubmit={handleSubmit}
                     processing={processing}
+                />
+            )}
+
+            {/* Modal Open Bill */}
+            {showModalOpenBill && (
+                <ModalOpenBill
+                    initialData={activeOpenBill}
+                    total={total}
+                    itemCount={keranjang.reduce((s, i) => s + i.qty, 0)}
+                    onClose={() => setShowModalOpenBill(false)}
+                    onSubmit={handleSaveOpenBill}
+                    processing={openBillProcessing}
+                />
+            )}
+
+            {/* Modal Daftar Meja */}
+            {showModalDaftarMeja && (
+                <ModalDaftarMeja
+                    openBills={open_bills}
+                    onClose={() => setShowModalDaftarMeja(false)}
+                    onSelectBill={handleSelectBill}
+                    onDeleteBill={handleDeleteBill}
                 />
             )}
         </AppLayout>

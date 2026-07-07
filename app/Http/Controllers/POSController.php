@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BahanBaku;
 use App\Models\DetailResep;
+use App\Models\OpenBill;
 use App\Models\Produk;
 use App\Services\InventoryService;
 use App\Services\RecipeService;
@@ -53,6 +54,7 @@ class POSController extends Controller
 
         return Inertia::render('POS/Index', [
             'produk_per_kategori' => $produk,
+            'open_bills'          => OpenBill::with('user:id,name')->latest()->get(),
         ]);
     }
 
@@ -70,6 +72,7 @@ class POSController extends Controller
             'piutang_data.nama_pelanggan' => 'required_if:metode_pembayaran,piutang|string|max:100',
             'piutang_data.nomor_wa'    => 'nullable|string|max:20',
             'catatan'                  => 'nullable|string|max:255',
+            'open_bill_id'             => 'nullable|integer|exists:open_bills,id',
         ]);
 
         try {
@@ -80,6 +83,10 @@ class POSController extends Controller
                 piutangData:      $validated['piutang_data'] ?? [],
                 catatan:          $validated['catatan'] ?? null
             );
+
+            if (!empty($validated['open_bill_id'])) {
+                OpenBill::where('id', $validated['open_bill_id'])->delete();
+            }
 
             return redirect()->route('pos.struk', $hasil['transaksi']->id)
                 ->with('success', 'Transaksi berhasil! No: ' . $hasil['transaksi']->nomor_transaksi);
@@ -144,5 +151,62 @@ class POSController extends Controller
         }
 
         return response()->json(['items' => $hasil]);
+    }
+
+    /**
+     * Simpan pesanan ke meja aktif (Open Bill).
+     */
+    public function storeOpenBill(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_meja'      => 'required|string|max:100',
+            'keranjang'      => 'required|array|min:1',
+            'catatan'        => 'nullable|string|max:500',
+            'total_estimasi' => 'required|numeric|min:0',
+        ]);
+
+        OpenBill::create([
+            'nama_meja'      => $validated['nama_meja'],
+            'keranjang'      => $validated['keranjang'],
+            'catatan'        => $validated['catatan'] ?? null,
+            'total_estimasi' => $validated['total_estimasi'],
+            'user_id'        => auth()->id(),
+        ]);
+
+        return redirect()->route('pos.index')->with('success', "Pesanan meja '{$validated['nama_meja']}' berhasil disimpan!");
+    }
+
+    /**
+     * Update pesanan di meja aktif (Open Bill).
+     */
+    public function updateOpenBill(Request $request, OpenBill $openBill): RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama_meja'      => 'required|string|max:100',
+            'keranjang'      => 'required|array|min:1',
+            'catatan'        => 'nullable|string|max:500',
+            'total_estimasi' => 'required|numeric|min:0',
+        ]);
+
+        $openBill->update([
+            'nama_meja'      => $validated['nama_meja'],
+            'keranjang'      => $validated['keranjang'],
+            'catatan'        => $validated['catatan'] ?? null,
+            'total_estimasi' => $validated['total_estimasi'],
+            'user_id'        => auth()->id(),
+        ]);
+
+        return redirect()->route('pos.index')->with('success', "Pesanan meja '{$validated['nama_meja']}' berhasil diperbarui!");
+    }
+
+    /**
+     * Hapus meja aktif (Batal pesanan).
+     */
+    public function deleteOpenBill(OpenBill $openBill): RedirectResponse
+    {
+        $nama = $openBill->nama_meja;
+        $openBill->delete();
+
+        return redirect()->route('pos.index')->with('success', "Meja '{$nama}' berhasil dihapus / dibatalkan.");
     }
 }
