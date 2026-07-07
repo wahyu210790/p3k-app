@@ -156,13 +156,13 @@ export default function PembelianShow({ pembelian }) {
                                             {detail.bahan_baku?.nama || 'Bahan Baku Terhapus'}
                                         </td>
                                         <td className="py-3 px-2 text-right font-semibold">
-                                            {detail.jumlah} <span className="text-xs text-slate-400 print:text-slate-600">{detail.bahan_baku?.satuan}</span>
+                                            {Number(detail.jumlah).toLocaleString('id-ID')} <span className="text-xs text-slate-400 print:text-slate-600">{detail.bahan_baku?.satuan}</span>
                                         </td>
                                         <td className="py-3 px-2 text-right">
                                             {rupiah(detail.harga_satuan)}
                                         </td>
                                         <td className="py-3 px-2 text-right font-bold text-amber-400 print:text-slate-900">
-                                            {rupiah(detail.subtotal_tagihan)}
+                                            {rupiah(detail.subtotal || detail.subtotal_tagihan)}
                                         </td>
                                         <td className="py-3 px-2 text-center print:hidden">
                                             <button
@@ -286,7 +286,7 @@ export default function PembelianShow({ pembelian }) {
                             <div>
                                 <h2 className="font-bold text-white text-base">Hapus Item Pembelian?</h2>
                                 <p className="text-xs text-slate-400 mt-0.5">
-                                    {itemToDelete.bahan_baku?.nama || 'Item'} ({itemToDelete.jumlah} {itemToDelete.bahan_baku?.satuan})
+                                    {itemToDelete.bahan_baku?.nama || 'Item'} ({Number(itemToDelete.jumlah).toLocaleString('id-ID')} {itemToDelete.bahan_baku?.satuan})
                                 </p>
                             </div>
                         </div>

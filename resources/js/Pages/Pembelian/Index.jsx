@@ -181,7 +181,7 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                                             <td className="px-5 py-3.5 max-w-[380px]">
                                                 <div
                                                     className="flex flex-wrap gap-1.5"
-                                                    title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${d.jumlah} ${d.bahan_baku?.satuan} - @ ${rupiah(d.harga_satuan)})`).join('\n')}
+                                                    title={p.detail_pembelian?.map(d => `${d.bahan_baku?.nama || 'Item'} (${Number(d.jumlah).toLocaleString('id-ID')} ${d.bahan_baku?.satuan} - @ ${rupiah(d.harga_satuan)})`).join('\n')}
                                                 >
                                                     {p.detail_pembelian && p.detail_pembelian.length > 0 ? (
                                                         <>
@@ -189,7 +189,7 @@ export default function PembelianIndex({ pembelian, suppliers, filters = {} }) {
                                                                 <span key={idx} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700/80 text-slate-300 text-xs font-medium shadow-sm">
                                                                     <span className="text-amber-400 font-semibold">{item.bahan_baku?.nama || 'Item'}</span>
                                                                     <span className="text-slate-300 text-[11px] bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-700/50">
-                                                                        {item.jumlah} {item.bahan_baku?.satuan} • <span className="text-emerald-400 font-semibold">{rupiah(item.harga_satuan)}</span>
+                                                                        {Number(item.jumlah).toLocaleString('id-ID')} {item.bahan_baku?.satuan} • <span className="text-emerald-400 font-semibold">{rupiah(item.harga_satuan)}</span>
                                                                     </span>
                                                                 </span>
                                                             ))}
