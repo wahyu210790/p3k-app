@@ -69,7 +69,7 @@ class TransactionService
         $persenOps = Pengaturan::getPersenOperasional();
 
         return DB::transaction(function () use (
-            $userId, $items, $metodePembayaran, $piutangData, $catatan, $persenOps
+            $userId, $items, $metodePembayaran, $piutangData, $catatan, $persenOps, $tanggalTransaksi
         ) {
             $totalHargaJual       = 0;
             $totalHPP             = 0;
