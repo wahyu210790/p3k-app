@@ -14,7 +14,7 @@ const Field = ({ label, error, children }) => (
 export default function NonSalesCreate({ label_kategori, produk, bahan_baku }) {
     const { data, setData, post, processing, errors } = useForm({
         kategori: Object.keys(label_kategori)[0] ?? 'jatah_karyawan',
-        tanggal:  new Date().toISOString().slice(0, 10),
+        tanggal:  new Date().toLocaleDateString('en-CA'),
         catatan:  '',
         items:    [{ tipe: 'produk', produk_id: '', bahan_baku_id: '', jumlah: '' }],
     });

@@ -8,7 +8,7 @@ export default function StockOpnameCreate({ bahan_baku, tanggal }) {
     const [search, setSearch] = useState('');
 
     const { data, setData, post, processing, errors } = useForm({
-        tanggal: tanggal || new Date().toISOString().slice(0, 10),
+        tanggal: tanggal || new Date().toLocaleDateString('en-CA'),
         catatan: '',
         items: bahan_baku.map((b) => ({
             bahan_baku_id: b.id,

@@ -6,7 +6,7 @@ export default function PengeluaranCreate({ label_kategori, saldo_operasional })
     const { data, setData, post, processing, errors } = useForm({
         kategori:   Object.keys(label_kategori)[0] ?? 'listrik',
         jumlah:     '',
-        tanggal:    new Date().toISOString().slice(0, 10),
+        tanggal:    new Date().toLocaleDateString('en-CA'),
         keterangan: '',
     });
 

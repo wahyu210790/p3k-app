@@ -25,7 +25,7 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
     const { data, setData, post, processing, errors } = useForm({
         supplier_id:       '',
         nomor_faktur:      '',
-        tanggal_pembelian: new Date().toISOString().slice(0, 10),
+        tanggal_pembelian: new Date().toLocaleDateString('en-CA'),
         jumlah_bayar:      '',
         catatan:           '',
         items:             [{ bahan_baku_id: '', jumlah: '', harga_satuan: '' }],

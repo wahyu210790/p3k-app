@@ -15,8 +15,8 @@ export default function PromoForm({ promo, produk }) {
     const { data, setData, post, put, processing, errors } = useForm({
         nama:            promo?.nama ?? '',
         tipe:            promo?.tipe ?? 'harga_khusus',
-        tanggal_mulai:   promo?.tanggal_mulai ?? new Date().toISOString().slice(0, 10),
-        tanggal_selesai: promo?.tanggal_selesai ?? new Date(Date.now() + 7*86400000).toISOString().slice(0, 10),
+        tanggal_mulai:   promo?.tanggal_mulai ?? new Date().toLocaleDateString('en-CA'),
+        tanggal_selesai: promo?.tanggal_selesai ?? new Date(Date.now() + 7*86400000).toLocaleDateString('en-CA'),
         keterangan:      promo?.keterangan ?? '',
         is_active:       promo?.is_active ?? true,
         produk: promo?.detail_promo?.map(dp => ({

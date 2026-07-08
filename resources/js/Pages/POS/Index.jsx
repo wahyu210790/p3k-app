@@ -85,7 +85,7 @@ function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
     const [metode, setMetode] = useState('cash');
     const [piutang, setPiutang] = useState({ nama_pelanggan: '', nomor_wa: '' });
     const [useCustomDate, setUseCustomDate] = useState(false);
-    const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
+    const [customDate, setCustomDate] = useState(new Date().toLocaleDateString('en-CA'));
 
     const metodeList = [
         { value: 'cash', label: '💵 Cash' },
@@ -136,7 +136,7 @@ function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
                                     type="date"
                                     value={customDate}
                                     onChange={e => setCustomDate(e.target.value)}
-                                    max={new Date().toISOString().split('T')[0]}
+                                    max={new Date().toLocaleDateString('en-CA')}
                                     className="w-full bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
                                 />
                                 <p className="text-[10px] text-amber-400 mt-1.5 leading-relaxed">
