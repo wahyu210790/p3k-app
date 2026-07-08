@@ -149,9 +149,11 @@ class FinancialService
         Transaksi $transaksi,
         string    $namaPelanggan,
         ?string   $nomorWa = null,
-        ?string   $catatan = null
+        ?string   $catatan = null,
+        ?string   $tanggalTransaksi = null
     ): PiutangPelanggan {
-        return PiutangPelanggan::create([
+        $tglObj = $tanggalTransaksi ? \Carbon\Carbon::parse($tanggalTransaksi) : now();
+        $piutang = PiutangPelanggan::create([
             'transaksi_id'    => $transaksi->id,
             'nama_pelanggan'  => $namaPelanggan,
             'nomor_wa'        => $nomorWa,
@@ -159,9 +161,16 @@ class FinancialService
             'jumlah_bayar'    => 0,
             'sisa_piutang'    => $transaksi->total_harga_jual,
             'status'          => 'belum_lunas',
-            'tanggal_piutang' => now()->toDateString(),
+            'tanggal_piutang' => $tglObj->toDateString(),
             'catatan'         => $catatan,
         ]);
+
+        if ($tanggalTransaksi) {
+            $piutang->created_at = $tglObj;
+            $piutang->saveQuietly();
+        }
+
+        return $piutang;
     }
 
     /**

@@ -52,7 +52,8 @@ class TransactionService
         array  $items,
         string $metodePembayaran,
         array  $piutangData = [],
-        ?string $catatan = null
+        ?string $catatan = null,
+        ?string $tanggalTransaksi = null
     ): array {
         if (empty($items)) {
             throw new \Exception('Keranjang belanja kosong.');
@@ -140,10 +141,12 @@ class TransactionService
             }
 
             // === Buat record Transaksi ===
+            $tglObj = $tanggalTransaksi ? \Carbon\Carbon::parse($tanggalTransaksi) : now();
+
             $transaksi = Transaksi::create([
                 'user_id'                => $userId,
-                'nomor_transaksi'        => Transaksi::generateNomor(),
-                'tanggal_transaksi'      => now(),
+                'nomor_transaksi'        => Transaksi::generateNomor($tglObj->toDateString()),
+                'tanggal_transaksi'      => $tglObj,
                 'total_harga_jual'       => round($totalHargaJual, 2),
                 'total_hpp'              => round($totalHPP, 2),
                 'total_dana_modal'       => round($totalDanaModal, 2),
@@ -153,6 +156,11 @@ class TransactionService
                 'status'                 => $metodePembayaran === 'piutang' ? 'piutang' : 'selesai',
                 'catatan'                => $catatan,
             ]);
+
+            if ($tanggalTransaksi) {
+                $transaksi->created_at = $tglObj;
+                $transaksi->saveQuietly();
+            }
 
             // === Buat DetailTransaksi untuk setiap item ===
             foreach ($detailItems as $detail) {
@@ -176,7 +184,8 @@ class TransactionService
                     transaksi:      $transaksi,
                     namaPelanggan:  $piutangData['nama_pelanggan'],
                     nomorWa:        $piutangData['nomor_wa'] ?? null,
-                    catatan:        $piutangData['catatan']  ?? null
+                    catatan:        $piutangData['catatan']  ?? null,
+                    tanggalTransaksi: $tanggalTransaksi
                 );
             }
 

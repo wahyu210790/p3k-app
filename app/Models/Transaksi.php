@@ -42,9 +42,9 @@ class Transaksi extends Model
     }
 
     /** Generate nomor transaksi unik: TRX-YYYYMMDD-XXXX */
-    public static function generateNomor(): string
+    public static function generateNomor(?string $tanggal = null): string
     {
-        $today  = now()->format('Ymd');
+        $today  = $tanggal ? \Carbon\Carbon::parse($tanggal)->format('Ymd') : now()->format('Ymd');
         $prefix = "TRX-{$today}-";
         $last   = static::where('nomor_transaksi', 'like', "{$prefix}%")
             ->orderByDesc('nomor_transaksi')

@@ -73,6 +73,7 @@ class POSController extends Controller
             'piutang_data.nomor_wa'    => 'nullable|string|max:20',
             'catatan'                  => 'nullable|string|max:255',
             'open_bill_id'             => 'nullable|integer|exists:open_bills,id',
+            'tanggal_transaksi'        => 'nullable|date',
         ]);
 
         try {
@@ -81,7 +82,8 @@ class POSController extends Controller
                 items:            $validated['items'],
                 metodePembayaran: $validated['metode_pembayaran'],
                 piutangData:      $validated['piutang_data'] ?? [],
-                catatan:          $validated['catatan'] ?? null
+                catatan:          $validated['catatan'] ?? null,
+                tanggalTransaksi: $validated['tanggal_transaksi'] ?? null
             );
 
             if (!empty($validated['open_bill_id'])) {

@@ -84,6 +84,8 @@ function KeranjangItem({ item, onUpdate, onHapus }) {
 function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
     const [metode, setMetode] = useState('cash');
     const [piutang, setPiutang] = useState({ nama_pelanggan: '', nomor_wa: '' });
+    const [useCustomDate, setUseCustomDate] = useState(false);
+    const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
 
     const metodeList = [
         { value: 'cash', label: '💵 Cash' },
@@ -109,6 +111,39 @@ function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
                         <p className="text-xs text-amber-400 font-medium">TOTAL PEMBAYARAN</p>
                         <p className="text-3xl font-black text-amber-400">{rupiah(total)}</p>
                         <p className="text-xs text-slate-500 mt-1">{keranjang.length} item</p>
+                    </div>
+
+                    {/* Opsi Tanggal Transaksi (Untuk Backdate Orderan Lama) */}
+                    <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-3 transition-all">
+                        <div className="flex items-center justify-between">
+                            <label onClick={() => setUseCustomDate(!useCustomDate)} className="text-xs font-semibold text-slate-300 flex items-center gap-1.5 cursor-pointer select-none">
+                                <ClockIcon className="w-4 h-4 text-amber-400" />
+                                <span>Input Untuk Tanggal Lama?</span>
+                            </label>
+                            <input
+                                type="checkbox"
+                                checked={useCustomDate}
+                                onChange={e => setUseCustomDate(e.target.checked)}
+                                className="rounded bg-slate-700 border-slate-500 text-amber-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                            />
+                        </div>
+                        {useCustomDate && (
+                            <div className="mt-2.5 pt-2.5 border-t border-slate-700 animate-fadeIn">
+                                <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                                    Pilih Tanggal Orderan:
+                                </label>
+                                <input
+                                    type="date"
+                                    value={customDate}
+                                    onChange={e => setCustomDate(e.target.value)}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
+                                />
+                                <p className="text-[10px] text-amber-400 mt-1.5 leading-relaxed">
+                                    💡 <span className="font-semibold">Info:</span> Transaksi, laporan & riwayat keuntungan akan tercatat di tanggal yang dipilih ini.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Metode Pembayaran */}
@@ -153,7 +188,7 @@ function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
                         Batal
                     </button>
                     <button
-                        onClick={() => onSubmit(metode, metode === 'piutang' ? piutang : {})}
+                        onClick={() => onSubmit(metode, metode === 'piutang' ? piutang : {}, useCustomDate ? customDate : null)}
                         disabled={processing || (metode === 'piutang' && !piutang.nama_pelanggan)}
                         className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
                         {processing ? (
@@ -446,7 +481,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
         }
     };
 
-    const handleSubmit = (metode, piutangData) => {
+    const handleSubmit = (metode, piutangData, tanggalTransaksi = null) => {
         setProcessing(true);
         router.post(route('pos.checkout'), {
             items: keranjang.map(i => ({
@@ -457,6 +492,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
             metode_pembayaran: metode,
             piutang_data: piutangData,
             open_bill_id: activeOpenBill?.id || null,
+            tanggal_transaksi: tanggalTransaksi,
         }, {
             onSuccess: () => {
                 setKeranjang([]);
