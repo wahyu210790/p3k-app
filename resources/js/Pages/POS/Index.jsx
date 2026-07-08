@@ -18,6 +18,7 @@ function ProdukCard({ produk, onTambah }) {
         <button
             onClick={() => !habis && onTambah(produk)}
             disabled={habis}
+            title={produk.nama}
             className={`relative flex flex-col items-center text-center rounded-2xl p-3 border transition-all duration-150 w-full
                 ${habis
                     ? 'bg-slate-800/30 border-slate-700/30 opacity-50 cursor-not-allowed'
@@ -37,7 +38,7 @@ function ProdukCard({ produk, onTambah }) {
                     <ShoppingCartIcon className="w-7 h-7 text-slate-500" />
                 </div>
             )}
-            <p className="text-xs font-semibold text-white leading-tight line-clamp-2">{produk.nama}</p>
+            <p className="text-xs font-semibold text-white leading-tight line-clamp-3">{produk.nama}</p>
             <div className="mt-1">
                 {adaPromo && (
                     <p className="text-xs text-slate-500 line-through">{rupiah(produk.harga_jual)}</p>
@@ -52,10 +53,10 @@ function ProdukCard({ produk, onTambah }) {
 /* ── Komponen Item di Keranjang ── */
 function KeranjangItem({ item, onUpdate, onHapus }) {
     return (
-        <div className="flex items-center gap-3 py-2.5 border-b border-slate-700/40 last:border-0">
+        <div className="flex items-center gap-3 py-2.5 border-b border-slate-700/40 last:border-0" title={item.nama}>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white leading-tight truncate">{item.nama}</p>
-                <p className="text-xs text-amber-400">{rupiah(item.harga_aktual)}</p>
+                <p className="text-sm font-medium text-white leading-snug line-clamp-2 break-words">{item.nama}</p>
+                <p className="text-xs text-amber-400 mt-0.5">{rupiah(item.harga_aktual)}</p>
             </div>
             <div className="flex items-center gap-1">
                 <button onClick={() => onUpdate(item.produk_id, item.qty - 1)}
@@ -553,7 +554,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                 </div>
 
                 {/* ── Panel Keranjang (kanan/bawah) ── */}
-                <div className="lg:w-80 xl:w-96 flex flex-col bg-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden shrink-0">
+                <div className="lg:w-[410px] xl:w-[440px] flex flex-col bg-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden shrink-0">
                     <div className="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <ShoppingCartIcon className="w-5 h-5 text-amber-400" />
