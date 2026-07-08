@@ -371,6 +371,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
     const [showModalOpenBill, setShowModalOpenBill] = useState(false);
     const [showModalDaftarMeja, setShowModalDaftarMeja] = useState(false);
     const [openBillProcessing, setOpenBillProcessing] = useState(false);
+    const [showMobileCart, setShowMobileCart] = useState(false);
 
     const semuaProduk = useMemo(() => {
         return Object.values(produk_per_kategori).flat();
@@ -514,16 +515,25 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
 
                 {/* ── Panel Produk (kiri/atas) ── */}
                 <div className="flex-1 flex flex-col min-h-0">
-                    {/* Search + Filter Kategori */}
+                    {/* Search + Filter Kategori + Tombol Meja Aktif Mobile */}
                     <div className="mb-4 space-y-3">
-                        <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                            <input
-                                type="text" value={search}
-                                onChange={e => setSearch(e.target.value)}
-                                placeholder="Cari produk..."
-                                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
-                            />
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <input
+                                    type="text" value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    placeholder="Cari produk..."
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                                />
+                            </div>
+                            {/* Tombol Meja Aktif (Khusus HP / Mobile) */}
+                            <button
+                                onClick={() => setShowModalDaftarMeja(true)}
+                                className="lg:hidden shrink-0 px-3 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-400 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm">
+                                <ClipboardDocumentListIcon className="w-4 h-4" />
+                                <span>Meja ({open_bills.length})</span>
+                            </button>
                         </div>
                         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                             {kategoriList.map(k => (
@@ -545,7 +555,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                             Produk tidak ditemukan
                         </div>
                     ) : (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2 overflow-y-auto pb-4">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-3 xl:grid-cols-4 gap-2 overflow-y-auto pb-24 lg:pb-4">
                             {produkFiltered.map(p => (
                                 <ProdukCard key={p.id} produk={p} onTambah={tambahKeKeranjang} />
                             ))}
@@ -553,8 +563,8 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                     )}
                 </div>
 
-                {/* ── Panel Keranjang (kanan/bawah) ── */}
-                <div className="lg:w-[410px] xl:w-[440px] flex flex-col bg-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden shrink-0">
+                {/* ── Panel Keranjang (kanan/bawah - Khusus PC / Desktop) ── */}
+                <div className="hidden lg:flex lg:w-[410px] xl:w-[440px] flex-col bg-slate-900/80 rounded-2xl border border-slate-700/50 overflow-hidden shrink-0">
                     <div className="px-4 py-3 border-b border-slate-700/50 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <ShoppingCartIcon className="w-5 h-5 text-amber-400" />
@@ -644,6 +654,118 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                     )}
                 </div>
             </div>
+
+            {/* ── Floating Bar Keranjang (Khusus HP / Mobile) ── */}
+            {(keranjang.length > 0 || activeOpenBill) && (
+                <div 
+                    onClick={() => setShowMobileCart(true)}
+                    className="fixed bottom-4 left-4 right-4 z-30 lg:hidden bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-900 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between gap-3 transition-all cursor-pointer border-2 border-amber-300">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="bg-slate-900 text-amber-400 font-extrabold text-xs px-2.5 py-1 rounded-xl shrink-0 flex items-center gap-1.5 shadow-sm">
+                            <ShoppingCartIcon className="w-4 h-4" />
+                            <span>{keranjang.reduce((s, i) => s + i.qty, 0)}</span>
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-bold text-slate-900/80 uppercase leading-none">
+                                {activeOpenBill ? `Meja: ${activeOpenBill.nama_meja}` : 'Total Keranjang'}
+                            </p>
+                            <p className="text-base font-black text-slate-900 truncate leading-tight mt-0.5">
+                                {rupiah(total)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1 font-bold text-xs bg-slate-900/10 px-3 py-1.5 rounded-xl shrink-0">
+                        <span>Lihat / Bayar</span>
+                        <span>➔</span>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Mobile Drawer / Bottom Sheet Keranjang (Khusus HP / Mobile) ── */}
+            {showMobileCart && (
+                <div className="fixed inset-0 z-50 flex flex-col justify-end lg:hidden">
+                    <div className="absolute inset-0 bg-black/75 backdrop-blur-xs" onClick={() => setShowMobileCart(false)} />
+                    <div className="relative bg-slate-900 rounded-t-3xl border-t border-slate-700 shadow-2xl max-h-[85vh] flex flex-col w-full overflow-hidden z-10">
+                        {/* Drawer Header */}
+                        <div className="px-5 py-3.5 border-b border-slate-700 flex items-center justify-between gap-2 shrink-0 bg-slate-800/60">
+                            <div className="flex items-center gap-2">
+                                <ShoppingCartIcon className="w-5 h-5 text-amber-400" />
+                                <h3 className="font-bold text-white text-base">Keranjang Pesanan</h3>
+                                {keranjang.length > 0 && (
+                                    <span className="bg-amber-500 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full">
+                                        {keranjang.length} item
+                                    </span>
+                                )}
+                            </div>
+                            <button onClick={() => setShowMobileCart(false)}
+                                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white border border-slate-700">
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Banner Jika Sedang Melayani Meja Aktif */}
+                        {activeOpenBill && (
+                            <div className="mx-4 mt-3 px-3 py-2.5 bg-amber-500/15 border border-amber-500/50 rounded-xl flex items-center justify-between gap-2 shadow-sm shrink-0">
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Sedang Melayani:</p>
+                                    <p className="text-sm font-black text-white break-words">{activeOpenBill.nama_meja}</p>
+                                </div>
+                                <button
+                                    onClick={() => { setActiveOpenBill(null); setKeranjang([]); setShowMobileCart(false); }}
+                                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold shrink-0 border border-slate-600 transition-colors">
+                                    Tutup / Lepas
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Drawer Items */}
+                        <div className="p-4 overflow-y-auto space-y-2 flex-1">
+                            {keranjang.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-40 text-slate-500 text-center">
+                                    <ShoppingCartIcon className="w-10 h-10 mb-2 opacity-50" />
+                                    <p className="text-sm font-semibold">Keranjang masih kosong</p>
+                                    <p className="text-xs mt-1 text-slate-600">Pilih menu di layar belakang untuk menambah</p>
+                                </div>
+                            ) : (
+                                keranjang.map(item => (
+                                    <KeranjangItem key={item.produk_id} item={item}
+                                        onUpdate={updateQty} onHapus={hapusItem} />
+                                ))
+                            )}
+                        </div>
+
+                        {/* Drawer Footer & Actions */}
+                        {keranjang.length > 0 && (
+                            <div className="p-4 border-t border-slate-700/80 bg-slate-900/95 space-y-3 shrink-0">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-slate-400 text-sm font-semibold">Total Pembayaran</span>
+                                    <span className="text-xl font-black text-amber-400">{rupiah(total)}</span>
+                                </div>
+
+                                {/* Tombol Simpan ke Meja (Open Bill) */}
+                                <button
+                                    onClick={() => { setShowMobileCart(false); setShowModalOpenBill(true); }}
+                                    className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 border border-amber-500/30 font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm">
+                                    <BookmarkIcon className="w-4 h-4" />
+                                    {activeOpenBill ? `Update Pesanan '${activeOpenBill.nama_meja}'` : '📌 Simpan ke Meja (Open Bill)'}
+                                </button>
+
+                                <div className="flex gap-2">
+                                    <button onClick={() => { setKeranjang([]); setActiveOpenBill(null); setShowMobileCart(false); }}
+                                        className="px-3 py-3 rounded-xl bg-slate-800 hover:bg-red-900/50 text-slate-400 hover:text-red-400 border border-slate-700 transition-colors">
+                                        <TrashIcon className="w-5 h-5" />
+                                    </button>
+                                    <button onClick={() => { setShowMobileCart(false); setShowCheckout(true); }}
+                                        className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+                                        <CheckIcon className="w-5 h-5" />
+                                        Bayar Sekarang ({rupiah(total)})
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Modal Checkout */}
             {showCheckout && (
