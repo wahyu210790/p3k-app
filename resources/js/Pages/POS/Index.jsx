@@ -38,7 +38,7 @@ function ProdukCard({ produk, onTambah }) {
                     <ShoppingCartIcon className="w-7 h-7 text-slate-500" />
                 </div>
             )}
-            <p className="text-xs font-semibold text-white leading-tight line-clamp-3">{produk.nama}</p>
+            <p className="text-xs font-semibold text-white leading-tight break-words">{produk.nama}</p>
             <div className="mt-1">
                 {adaPromo && (
                     <p className="text-xs text-slate-500 line-through">{rupiah(produk.harga_jual)}</p>
@@ -55,7 +55,7 @@ function KeranjangItem({ item, onUpdate, onHapus }) {
     return (
         <div className="flex items-center gap-3 py-2.5 border-b border-slate-700/40 last:border-0" title={item.nama}>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white leading-snug line-clamp-2 break-words">{item.nama}</p>
+                <p className="text-sm font-medium text-white leading-snug break-words">{item.nama}</p>
                 <p className="text-xs text-amber-400 mt-0.5">{rupiah(item.harga_aktual)}</p>
             </div>
             <div className="flex items-center gap-1">
@@ -580,7 +580,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                         <div className="mx-4 mt-3 px-3 py-2.5 bg-amber-500/15 border border-amber-500/50 rounded-xl flex items-center justify-between gap-2 shadow-sm">
                             <div className="min-w-0">
                                 <p className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Sedang Melayani:</p>
-                                <p className="text-sm font-black text-white truncate">{activeOpenBill.nama_meja}</p>
+                                <p className="text-sm font-black text-white break-words">{activeOpenBill.nama_meja}</p>
                             </div>
                             <button
                                 onClick={() => { setActiveOpenBill(null); setKeranjang([]); }}
