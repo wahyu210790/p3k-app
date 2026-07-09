@@ -1,5 +1,5 @@
 import AppLayout from '@/Layouts/AppLayout';
-import { rupiah } from '@/lib/utils';
+import { rupiah, formatStok } from '@/lib/utils';
 import {
     BanknotesIcon, ShoppingCartIcon, ArrowTrendingUpIcon,
     ArrowTrendingDownIcon, ExclamationTriangleIcon, ClockIcon,
@@ -126,7 +126,7 @@ export default function Dashboard({ keuangan, total_nilai_stok, stok_rendah, tra
                                     <div key={b.id} className="px-4 py-2.5">
                                         <p className="text-sm text-white font-medium">{b.nama}</p>
                                         <p className="text-xs text-red-400">
-                                            {b.stok_saat_ini} {b.satuan} / min {b.stok_minimum}
+                                            {formatStok(b.stok_saat_ini)} {b.satuan} / min {formatStok(b.stok_minimum)}
                                         </p>
                                     </div>
                                 ))}

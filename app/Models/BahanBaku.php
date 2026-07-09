@@ -15,8 +15,8 @@ class BahanBaku extends Model
     ];
 
     protected $casts = [
-        'stok_saat_ini'  => 'decimal:3',
-        'stok_minimum'   => 'decimal:3',
+        'stok_saat_ini'  => 'float',
+        'stok_minimum'   => 'float',
         'is_rokok'       => 'boolean',
         'is_active'      => 'boolean',
     ];

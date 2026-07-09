@@ -14,7 +14,7 @@ class DetailPembelian extends Model
     ];
 
     protected $casts = [
-        'jumlah'       => 'decimal:3',
+        'jumlah'       => 'float',
         'harga_satuan' => 'decimal:2',
         'subtotal'     => 'decimal:2',
     ];

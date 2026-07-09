@@ -16,8 +16,8 @@ class FifoBatch extends Model
 
     protected $casts = [
         'harga_beli'    => 'decimal:2',
-        'jumlah_awal'   => 'decimal:3',
-        'jumlah_sisa'   => 'decimal:3',
+        'jumlah_awal'   => 'float',
+        'jumlah_sisa'   => 'float',
         'tanggal_masuk' => 'date',
     ];
 

@@ -12,6 +12,17 @@ export function rupiah(amount, short = false) {
 }
 
 /**
+ * Format angka stok / kuantitas (menghilangkan .000 desimal berlebih dan memakai format desimal Indonesia)
+ * Contoh: formatStok("37.000") -> "37", formatStok("2.500") -> "2,5"
+ */
+export function formatStok(amount) {
+    if (amount === null || amount === undefined || amount === '') return '0';
+    const num = parseFloat(amount);
+    if (isNaN(num)) return '0';
+    return num.toLocaleString('id-ID', { maximumFractionDigits: 3 });
+}
+
+/**
  * Format tanggal ke format Indonesia
  */
 export function tanggalIndo(dateStr) {

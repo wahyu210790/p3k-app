@@ -15,7 +15,7 @@ class DetailNonSales extends Model
     ];
 
     protected $casts = [
-        'jumlah'       => 'decimal:3',
+        'jumlah'       => 'float',
         'hpp_satuan'   => 'decimal:2',
         'subtotal_hpp' => 'decimal:2',
     ];

@@ -2,6 +2,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { useForm, Link } from '@inertiajs/react';
 import { PlusIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { formatStok } from '@/lib/utils';
 
 const Field = ({ label, error, children }) => (
     <div>
@@ -161,7 +162,7 @@ export default function NonSalesCreate({ label_kategori, produk, bahan_baku }) {
                                                     <option value="">Pilih Bahan Baku...</option>
                                                     {bahan_baku.map((b) => (
                                                         <option key={b.id} value={b.id}>
-                                                            {b.nama} (Stok: {b.stok_saat_ini} {b.satuan})
+                                                            {b.nama} (Stok: {formatStok(b.stok_saat_ini)} {b.satuan})
                                                         </option>
                                                     ))}
                                                 </select>

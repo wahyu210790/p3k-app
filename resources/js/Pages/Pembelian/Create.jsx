@@ -2,7 +2,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { useForm, Link } from '@inertiajs/react';
 import { PlusIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { useState, useMemo } from 'react';
-import { rupiah } from '@/lib/utils';
+import { rupiah, formatStok } from '@/lib/utils';
 import SearchableSelect from '@/Components/SearchableSelect';
 
 const Field = ({ label, error, children }) => (
@@ -18,7 +18,7 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
         return bahan_baku.map((b) => ({
             value: b.id,
             label: b.nama,
-            sublabel: `Stok: ${b.stok_saat_ini} ${b.satuan}`,
+            sublabel: `Stok: ${formatStok(b.stok_saat_ini)} ${b.satuan}`,
         }));
     }, [bahan_baku]);
 

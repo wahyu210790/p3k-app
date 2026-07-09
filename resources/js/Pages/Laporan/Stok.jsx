@@ -1,6 +1,6 @@
 import AppLayout from '@/Layouts/AppLayout';
 import LaporanTabs from './LaporanTabs';
-import { rupiah } from '@/lib/utils';
+import { rupiah, formatStok } from '@/lib/utils';
 import { PrinterIcon, CubeIcon, ExclamationTriangleIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import { useSortableData } from '@/lib/sort';
 import SortableHeader from '@/Components/SortableHeader';
@@ -113,10 +113,10 @@ export default function LaporanStok({ bahan_baku, total_nilai, jumlah_rendah }) 
                                                 {b.nama}
                                             </td>
                                             <td className="px-5 py-3.5 text-right font-semibold text-slate-200 print:text-slate-800">
-                                                {b.stok_saat_ini} <span className="text-xs text-slate-500 print:text-slate-600">{b.satuan}</span>
+                                                {formatStok(b.stok_saat_ini)} <span className="text-xs text-slate-500 print:text-slate-600">{b.satuan}</span>
                                             </td>
                                             <td className="px-5 py-3.5 text-right text-slate-400">
-                                                {b.stok_minimum} <span className="text-xs">{b.satuan}</span>
+                                                {formatStok(b.stok_minimum)} <span className="text-xs">{b.satuan}</span>
                                             </td>
                                             <td className="px-5 py-3.5 text-right text-slate-300 print:text-slate-800">
                                                 {rupiah(b.hpp_rata_rata)}

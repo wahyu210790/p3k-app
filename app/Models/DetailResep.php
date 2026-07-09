@@ -12,7 +12,7 @@ class DetailResep extends Model
     protected $fillable = ['produk_id', 'bahan_baku_id', 'jumlah'];
 
     protected $casts = [
-        'jumlah' => 'decimal:3',
+        'jumlah' => 'float',
     ];
 
     public function produk(): BelongsTo

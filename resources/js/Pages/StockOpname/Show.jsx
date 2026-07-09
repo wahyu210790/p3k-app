@@ -1,5 +1,5 @@
 import AppLayout from '@/Layouts/AppLayout';
-import { rupiah, datetimeIndo } from '@/lib/utils';
+import { rupiah, datetimeIndo, formatStok } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { PrinterIcon, ArrowLeftIcon, ClipboardDocumentCheckIcon, UserIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
@@ -95,13 +95,13 @@ export default function StockOpnameShow({ opname }) {
                                                 {detail.bahan_baku?.nama || 'Bahan Baku Terhapus'}
                                             </td>
                                             <td className="py-3 px-2 text-right text-slate-400">
-                                                {detail.stok_sistem} <span className="text-xs">{detail.bahan_baku?.satuan}</span>
+                                                {formatStok(detail.stok_sistem)} <span className="text-xs">{detail.bahan_baku?.satuan}</span>
                                             </td>
                                             <td className="py-3 px-2 text-right font-semibold">
-                                                {detail.stok_fisik} <span className="text-xs text-slate-400 print:text-slate-600">{detail.bahan_baku?.satuan}</span>
+                                                {formatStok(detail.stok_fisik)} <span className="text-xs text-slate-400 print:text-slate-600">{detail.bahan_baku?.satuan}</span>
                                             </td>
                                             <td className={`py-3 px-2 text-right font-bold ${selisih < 0 ? 'text-red-400 print:text-red-600' : selisih > 0 ? 'text-emerald-400 print:text-emerald-600' : 'text-slate-500'}`}>
-                                                {selisih > 0 ? '+' : ''}{selisih} <span className="text-xs font-normal">{detail.bahan_baku?.satuan}</span>
+                                                {selisih > 0 ? '+' : ''}{formatStok(selisih)} <span className="text-xs font-normal">{detail.bahan_baku?.satuan}</span>
                                             </td>
                                             <td className="py-3 px-2 pl-4 text-xs text-slate-400 print:text-slate-700 italic">
                                                 {detail.keterangan || '—'}

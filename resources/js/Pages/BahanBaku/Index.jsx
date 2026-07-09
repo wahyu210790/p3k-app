@@ -1,5 +1,5 @@
 import AppLayout from '@/Layouts/AppLayout';
-import { rupiah } from '@/lib/utils';
+import { rupiah, formatStok } from '@/lib/utils';
 import { Link, router } from '@inertiajs/react';
 import { PlusIcon, PencilSquareIcon, ExclamationTriangleIcon, CubeIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
@@ -165,10 +165,10 @@ export default function BahanBakuIndex({ bahan_baku, total_nilai, filters }) {
                                             )}
                                         </td>
                                         <td className={`px-4 py-3 text-right font-semibold ${b.is_stok_rendah ? 'text-red-400' : 'text-white'}`}>
-                                            {b.stok_saat_ini} {b.satuan}
+                                            {formatStok(b.stok_saat_ini)} {b.satuan}
                                         </td>
                                         <td className="px-4 py-3 text-right text-slate-400">
-                                            {b.stok_minimum} {b.satuan}
+                                            {formatStok(b.stok_minimum)} {b.satuan}
                                         </td>
                                         <td className="px-4 py-3 text-right text-slate-300">
                                             {b.hpp_rata_rata > 0 ? rupiah(b.hpp_rata_rata) + '/' + b.satuan : '—'}

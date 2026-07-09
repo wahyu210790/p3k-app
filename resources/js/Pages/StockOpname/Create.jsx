@@ -2,7 +2,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { useForm, Link } from '@inertiajs/react';
 import { ExclamationCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useState, useMemo } from 'react';
-import { rupiah } from '@/lib/utils';
+import { rupiah, formatStok } from '@/lib/utils';
 
 export default function StockOpnameCreate({ bahan_baku, tanggal }) {
     const [search, setSearch] = useState('');
@@ -176,7 +176,7 @@ export default function StockOpnameCreate({ bahan_baku, tanggal }) {
                                                     <p className="text-xs text-slate-500">HPP: {rupiah(item.hpp_rata_rata)}/{item.satuan}</p>
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-medium text-slate-300">
-                                                    {item.stok_sistem} <span className="text-xs text-slate-500">{item.satuan}</span>
+                                                    {formatStok(item.stok_sistem)} <span className="text-xs text-slate-500">{item.satuan}</span>
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
                                                     <div className="relative">
@@ -194,7 +194,7 @@ export default function StockOpnameCreate({ bahan_baku, tanggal }) {
                                                     </div>
                                                 </td>
                                                 <td className={`px-4 py-3 text-right font-bold ${selisih < 0 ? 'text-red-400' : selisih > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
-                                                    {selisih > 0 ? '+' : ''}{selisih} <span className="text-xs font-normal">{item.satuan}</span>
+                                                    {selisih > 0 ? '+' : ''}{formatStok(selisih)} <span className="text-xs font-normal">{item.satuan}</span>
                                                 </td>
                                                 <td className={`px-4 py-3 text-right font-semibold ${nilaiSelisih < 0 ? 'text-red-400' : nilaiSelisih > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
                                                     {selisih !== 0 ? rupiah(nilaiSelisih) : '—'}
