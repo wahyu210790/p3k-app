@@ -35,7 +35,12 @@ Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah
         $financialService = app(\App\Services\FinancialService::class);
 
         foreach ($details as $detail) {
-            if (!$detail->produk || $detail->produk->detailResep->isEmpty()) {
+            if (!$detail->produk) {
+                $this->warn("[Skipped] Detail ID {$detail->id}: Produk sudah terhapus dari database.");
+                continue;
+            }
+            if ($detail->produk->detailResep->isEmpty()) {
+                $this->warn("[Skipped] Detail ID {$detail->id} ({$detail->produk->nama}): Produk ini belum memiliki Resep Bahan Baku.");
                 continue;
             }
 
@@ -49,6 +54,15 @@ Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah
                 if ($hargaRata <= 0) {
                     $lastBatch = \App\Models\FifoBatch::where('bahan_baku_id', $bahan->id)->latest('id')->first();
                     $hargaRata = $lastBatch ? (float) $lastBatch->harga_beli : 0;
+                }
+
+                if ($hargaRata <= 0) {
+                    $lastBeli = \App\Models\DetailPembelian::where('bahan_baku_id', $bahan->id)->latest('id')->first();
+                    $hargaRata = $lastBeli ? (float) $lastBeli->harga_satuan : 0;
+                }
+
+                if ($hargaRata <= 0) {
+                    $this->warn(" -> [Info] Bahan baku '{$bahan->nama}' pada produk '{$detail->produk->nama}' belum pernah dibeli/dicatat harganya (Rp 0).");
                 }
 
                 $hppKoreksiTotal += $jumlahDibutuhkan * $hargaRata;
