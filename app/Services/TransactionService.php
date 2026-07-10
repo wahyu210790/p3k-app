@@ -217,7 +217,7 @@ class TransactionService
             $inventoryService = app(InventoryService::class);
 
             $totalHarga = collect($data['items'])
-                ->sum(fn($i) => $i['jumlah'] * $i['harga_satuan']);
+                ->sum(fn($i) => isset($i['total_harga']) && $i['total_harga'] !== '' && (float) $i['total_harga'] > 0 ? (float) $i['total_harga'] : $i['jumlah'] * $i['harga_satuan']);
 
             $jumlahBayar = (float) ($data['jumlah_bayar'] ?? $totalHarga);
             $statusPembayaran = match (true) {
@@ -240,7 +240,7 @@ class TransactionService
 
             // Buat detail + tambah stok FIFO per bahan baku
             foreach ($data['items'] as $item) {
-                $subtotal = $item['jumlah'] * $item['harga_satuan'];
+                $subtotal = isset($item['total_harga']) && $item['total_harga'] !== '' && (float) $item['total_harga'] > 0 ? (float) $item['total_harga'] : $item['jumlah'] * $item['harga_satuan'];
 
                 \App\Models\DetailPembelian::create([
                     'pembelian_id'  => $pembelian->id,

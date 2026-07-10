@@ -28,11 +28,11 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
         tanggal_pembelian: new Date().toLocaleDateString('en-CA'),
         jumlah_bayar:      '',
         catatan:           '',
-        items:             [{ bahan_baku_id: '', jumlah: '', harga_satuan: '' }],
+        items:             [{ bahan_baku_id: '', jumlah: '', total_harga: '', harga_satuan: '' }],
     });
 
     const addItem = () => {
-        setData('items', [...data.items, { bahan_baku_id: '', jumlah: '', harga_satuan: '' }]);
+        setData('items', [...data.items, { bahan_baku_id: '', jumlah: '', total_harga: '', harga_satuan: '' }]);
     };
 
     const removeItem = (idx) => {
@@ -42,11 +42,45 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
     };
 
     const updateItem = (idx, field, val) => {
-        setData('items', data.items.map((item, i) => i === idx ? { ...item, [field]: val } : item));
+        setData('items', data.items.map((item, i) => {
+            if (i !== idx) return item;
+            const updated = { ...item, [field]: val };
+
+            if (field === 'jumlah') {
+                const qty = parseFloat(val) || 0;
+                if (item.total_harga !== undefined && item.total_harga !== '' && parseFloat(item.total_harga) > 0) {
+                    const hitungSatuan = qty > 0 ? (parseFloat(item.total_harga) / qty) : 0;
+                    updated.harga_satuan = qty > 0 ? Number(hitungSatuan.toFixed(4)) : '';
+                } else if (item.harga_satuan !== undefined && item.harga_satuan !== '' && parseFloat(item.harga_satuan) > 0) {
+                    updated.total_harga = qty > 0 ? Number((qty * parseFloat(item.harga_satuan)).toFixed(2)) : '';
+                }
+            } else if (field === 'total_harga') {
+                const total = parseFloat(val) || 0;
+                const qty = parseFloat(item.jumlah) || 0;
+                if (qty > 0 && val !== '') {
+                    const hitungSatuan = total / qty;
+                    updated.harga_satuan = Number(hitungSatuan.toFixed(4));
+                } else if (val === '') {
+                    updated.harga_satuan = '';
+                }
+            } else if (field === 'harga_satuan') {
+                const harga = parseFloat(val) || 0;
+                const qty = parseFloat(item.jumlah) || 0;
+                if (qty > 0 && val !== '') {
+                    updated.total_harga = Number((qty * harga).toFixed(2));
+                } else if (val === '') {
+                    updated.total_harga = '';
+                }
+            }
+            return updated;
+        }));
     };
 
     const totalTagihan = useMemo(() => {
         return data.items.reduce((sum, item) => {
+            if (item.total_harga !== undefined && item.total_harga !== '' && !isNaN(parseFloat(item.total_harga))) {
+                return sum + parseFloat(item.total_harga);
+            }
             const qty = parseFloat(item.jumlah) || 0;
             const harga = parseFloat(item.harga_satuan) || 0;
             return sum + (qty * harga);
@@ -138,12 +172,21 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
                         {errors.items && <p className="text-xs text-red-400">{errors.items}</p>}
 
                         <div className="space-y-3">
+                            {/* Header kolom khusus tampilan PC */}
+                            <div className="hidden sm:flex items-center gap-3 px-3.5 pt-1 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <div className="flex-1">Bahan Baku</div>
+                                <div className="w-32 text-center">Jumlah (Qty)</div>
+                                <div className="w-44 text-right">Total Harga Beli (Rp)</div>
+                                <div className="w-44 text-right">Harga / Satuan (Rp)</div>
+                                <div className="w-10"></div>
+                            </div>
+
                             {data.items.map((item, idx) => {
                                 const selectedBahan = bahan_baku.find(b => b.id == item.bahan_baku_id);
-                                const subtotal = (parseFloat(item.jumlah) || 0) * (parseFloat(item.harga_satuan) || 0);
                                 return (
                                     <div key={idx} style={{ zIndex: data.items.length - idx }} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/40 relative">
                                         <div className="flex-1 w-full sm:w-auto min-w-0">
+                                            <label className="block sm:hidden text-xs font-semibold text-slate-400 mb-1">Bahan Baku</label>
                                             <SearchableSelect
                                                 options={bahanBakuOptions}
                                                 value={item.bahan_baku_id}
@@ -152,14 +195,15 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
                                             />
                                         </div>
 
-                                        <div className="w-full sm:w-36">
+                                        <div className="w-full sm:w-32">
+                                            <label className="block sm:hidden text-xs font-semibold text-slate-400 mb-1">Jumlah (Qty)</label>
                                             <div className="relative">
                                                 <input
                                                     type="number"
                                                     value={item.jumlah}
                                                     onChange={(e) => updateItem(idx, 'jumlah', e.target.value)}
                                                     className={inputClass}
-                                                    placeholder="Jumlah"
+                                                    placeholder="Qty"
                                                     min="0.001"
                                                     step="0.001"
                                                     required
@@ -172,30 +216,49 @@ export default function PembelianCreate({ suppliers, bahan_baku }) {
                                             </div>
                                         </div>
 
-                                        <div className="w-full sm:w-48">
-                                            <input
-                                                type="number"
-                                                value={item.harga_satuan}
-                                                onChange={(e) => updateItem(idx, 'harga_satuan', e.target.value)}
-                                                className={inputClass}
-                                                placeholder="Harga / Satuan (Rp)"
-                                                min="1"
-                                                required
-                                            />
+                                        <div className="w-full sm:w-44">
+                                            <label className="block sm:hidden text-xs font-semibold text-slate-400 mb-1">Total Harga Beli (Rp)</label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-amber-400/80 font-bold pointer-events-none">Rp</span>
+                                                <input
+                                                    type="number"
+                                                    value={item.total_harga !== undefined ? item.total_harga : ''}
+                                                    onChange={(e) => updateItem(idx, 'total_harga', e.target.value)}
+                                                    className={`${inputClass} pl-8 text-right font-bold text-amber-300 border-amber-500/40 bg-amber-500/5 focus:bg-slate-800`}
+                                                    placeholder="Total Beli"
+                                                    min="0"
+                                                    step="any"
+                                                />
+                                            </div>
+                                            <p className="text-[10px] text-amber-400/70 mt-0.5 hidden sm:block italic">Isi untuk hitung satuan otomatis</p>
                                         </div>
 
-                                        <div className="w-full sm:w-36 text-right sm:text-right font-bold text-amber-400 text-sm">
-                                            {rupiah(subtotal)}
+                                        <div className="w-full sm:w-44">
+                                            <label className="block sm:hidden text-xs font-semibold text-slate-400 mb-1">Harga / Satuan (Rp)</label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium pointer-events-none">Rp</span>
+                                                <input
+                                                    type="number"
+                                                    value={item.harga_satuan !== undefined ? item.harga_satuan : ''}
+                                                    onChange={(e) => updateItem(idx, 'harga_satuan', e.target.value)}
+                                                    className={`${inputClass} pl-8 text-right text-slate-200 font-semibold`}
+                                                    placeholder="Satuan"
+                                                    min="0.001"
+                                                    step="any"
+                                                    required
+                                                />
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 mt-0.5 hidden sm:block italic">⚡ Otomatis / bisa diubah</p>
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={() => removeItem(idx)}
                                             disabled={data.items.length <= 1}
-                                            className="p-2.5 text-slate-500 hover:text-red-400 disabled:opacity-30 disabled:hover:text-slate-500 transition-colors self-end sm:self-center"
+                                            className="p-2.5 text-slate-500 hover:text-red-400 disabled:opacity-30 disabled:hover:text-slate-500 transition-colors self-end sm:self-center shrink-0 sm:mt-0"
                                             title="Hapus baris ini"
                                         >
-                                            <TrashIcon className="w-4 h-4" />
+                                            <TrashIcon className="w-5 h-5" />
                                         </button>
                                     </div>
                                 );

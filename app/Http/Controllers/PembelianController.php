@@ -67,7 +67,8 @@ class PembelianController extends Controller
             'items'                  => 'required|array|min:1',
             'items.*.bahan_baku_id'  => 'required|exists:bahan_baku,id',
             'items.*.jumlah'         => 'required|numeric|min:0.001',
-            'items.*.harga_satuan'   => 'required|numeric|min:1',
+            'items.*.harga_satuan'   => 'required|numeric|min:0.001',
+            'items.*.total_harga'    => 'nullable|numeric|min:0',
         ]);
 
         try {
