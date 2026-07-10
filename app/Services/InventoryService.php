@@ -112,6 +112,26 @@ class InventoryService
             $sisaHarusDikurangi -= $diambilDariBatch;
         }
 
+        // Safety fallback: jika masih ada sisa stok yang harus dikurangi namun batch FIFO sudah habis
+        // (misal karena selisih riwayat stok), gunakan HPP rata-rata atau harga beli terakhir agar HPP tidak Rp 0.
+        if ($sisaHarusDikurangi > 0) {
+            $hargaFallback = $bahanBaku->getHppRataRata();
+            if ($hargaFallback <= 0) {
+                $lastBatch = FifoBatch::where('bahan_baku_id', $bahanBakuId)->latest('id')->first();
+                $hargaFallback = $lastBatch ? (float) $lastBatch->harga_beli : 0;
+            }
+
+            $hppFallback = $sisaHarusDikurangi * $hargaFallback;
+            $totalHPP   += $hppFallback;
+
+            $rincianBatch[] = [
+                'batch_id'       => null,
+                'jumlah_diambil' => $sisaHarusDikurangi,
+                'harga_beli'     => round($hargaFallback, 2),
+                'hpp'            => round($hppFallback, 2),
+            ];
+        }
+
         // Update stok saat ini
         $bahanBaku->decrement('stok_saat_ini', $jumlahDibutuhkan);
 
