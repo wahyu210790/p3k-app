@@ -7,16 +7,30 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah data di database}', function () {
+Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah data di database} {--all : Hitung ulang HPP semua transaksi berdasarkan resep saat ini} {--max-hpp= : Koreksi item yang HPP-nya di bawah angka tertentu (misal --max-hpp=100)}', function () {
     $dryRun = $this->option('dry-run');
+    $all = $this->option('all');
+    $maxHpp = $this->option('max-hpp') !== null ? (float) $this->option('max-hpp') : 0;
+
     $this->info($dryRun ? "=== SIMULASI KOREKSI HPP LAMA (DRY RUN) ===" : "=== MEMULAI KOREKSI HPP DATA LAMA ===");
 
-    $details = \App\Models\DetailTransaksi::with('produk.detailResep.bahanBaku', 'transaksi')
-        ->where(function ($q) {
-            $q->where('subtotal_hpp', '<=', 0)
-              ->orWhereNull('subtotal_hpp');
-        })
-        ->get();
+    $query = \App\Models\DetailTransaksi::with('produk.detailResep.bahanBaku', 'transaksi');
+
+    if (!$all) {
+        if ($maxHpp > 0) {
+            $query->where(function ($q) use ($maxHpp) {
+                $q->where('subtotal_hpp', '<=', $maxHpp)
+                  ->orWhereNull('subtotal_hpp');
+            });
+        } else {
+            $query->where(function ($q) {
+                $q->where('subtotal_hpp', '<=', 0)
+                  ->orWhereNull('subtotal_hpp');
+            });
+        }
+    }
+
+    $details = $query->get();
 
     if ($details->isEmpty()) {
         $this->info("✔ Tidak ditemukan transaksi lama dengan HPP Rp 0. Semua data historis sudah aman!");
@@ -68,7 +82,7 @@ Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah
                 $hppKoreksiTotal += $jumlahDibutuhkan * $hargaRata;
             }
 
-            if ($hppKoreksiTotal > 0) {
+            if ($hppKoreksiTotal > 0 && abs($hppKoreksiTotal - (float) $detail->subtotal_hpp) > 0.01) {
                 $totalItemTerkoreksi++;
                 $selisihHpp = $hppKoreksiTotal - (float) $detail->subtotal_hpp;
                 $totalSelisihHpp += $selisihHpp;
