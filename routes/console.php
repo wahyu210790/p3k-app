@@ -149,3 +149,39 @@ Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah
         $this->error("Gagal mengkoreksi data: " . $e->getMessage());
     }
 })->purpose('Koreksi HPP dan Dompet Keuangan untuk transaksi historis yang HPP-nya Rp 0');
+
+Artisan::command('p3k:sinkron-stok {--dry-run : Hanya simulasi tanpa mengubah data}', function () {
+    $dryRun = $this->option('dry-run');
+    $this->info($dryRun ? "=== SIMULASI SINKRONISASI STOK DAN FIFO ===" : "=== MEMULAI SINKRONISASI STOK DAN FIFO ===");
+
+    $bahans = \App\Models\BahanBaku::all();
+    $selisihCount = 0;
+
+    foreach ($bahans as $b) {
+        $stokFifo = (float) \App\Models\FifoBatch::where('bahan_baku_id', $b->id)->sum('jumlah_sisa');
+        $stokSistem = (float) $b->stok_saat_ini;
+
+        if (abs($stokFifo - $stokSistem) > 0.001) {
+            $selisihCount++;
+            $this->warn("Bahan Baku: '{$b->nama}' (ID: {$b->id})");
+            $this->warn(" -> Stok Saat Ini (Tabel BahanBaku)  : {$stokSistem} {$b->satuan}");
+            $this->warn(" -> Total Sisa Batch (Tabel FifoBatch): {$stokFifo} {$b->satuan}");
+
+            if (!$dryRun) {
+                $b->update(['stok_saat_ini' => $stokFifo]);
+                $this->info("    ✔ Disinkronkan ke angka FIFO: {$stokFifo} {$b->satuan}");
+            }
+        }
+    }
+
+    if ($selisihCount === 0) {
+        $this->info("✔ Semua stok bahan baku sudah 100% sinkron dan cocok dengan batch FIFO.");
+    } else {
+        if ($dryRun) {
+            $this->warn("Ditemukan {$selisihCount} bahan baku dengan selisih stok antara tabel utama dan batch FIFO.");
+            $this->info("Jalankan `php artisan p3k:sinkron-stok` (tanpa --dry-run) untuk menyamakan angka stok ke total batch FIFO.");
+        } else {
+            $this->info("✔ Berhasil menyinkronkan {$selisihCount} bahan baku.");
+        }
+    }
+})->purpose('Sinkronisasi angka stok_saat_ini pada tabel bahan_baku agar pas dengan total sisa di fifo_batches');
