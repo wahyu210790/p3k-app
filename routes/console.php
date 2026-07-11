@@ -150,9 +150,42 @@ Artisan::command('p3k:koreksi-hpp {--dry-run : Hanya simulasi cek tanpa mengubah
     }
 })->purpose('Koreksi HPP dan Dompet Keuangan untuk transaksi historis yang HPP-nya Rp 0');
 
-Artisan::command('p3k:sinkron-stok {--dry-run : Hanya simulasi tanpa mengubah data}', function () {
+Artisan::command('p3k:sinkron-stok {--dry-run : Hanya simulasi tanpa mengubah data} {--regenerate-batch : Buat ulang batch FIFO yang hilang dari riwayat DetailPembelian}', function () {
     $dryRun = $this->option('dry-run');
+    $regenerate = $this->option('regenerate-batch');
     $this->info($dryRun ? "=== SIMULASI SINKRONISASI STOK DAN FIFO ===" : "=== MEMULAI SINKRONISASI STOK DAN FIFO ===");
+
+    if ($regenerate) {
+        $this->info(" -> Memeriksa riwayat pembelian untuk memulihkan batch FIFO yang hilang...");
+        $details = \App\Models\DetailPembelian::with('pembelian', 'bahanBaku')->get();
+        $restored = 0;
+        foreach ($details as $d) {
+            if (!$d->pembelian || !$d->bahanBaku) continue;
+            $hasBatch = \App\Models\FifoBatch::where('pembelian_id', $d->pembelian_id)
+                ->where('bahan_baku_id', $d->bahan_baku_id)
+                ->exists();
+
+            if (!$hasBatch) {
+                $restored++;
+                $this->warn(" -> [Pulih] Memulihkan batch FIFO untuk '{$d->bahanBaku->nama}' dari faktur {$d->pembelian->tanggal_pembelian} ({$d->jumlah} {$d->bahanBaku->satuan} @ Rp {$d->harga_satuan})");
+                if (!$dryRun) {
+                    \App\Models\FifoBatch::create([
+                        'bahan_baku_id' => $d->bahan_baku_id,
+                        'pembelian_id'  => $d->pembelian_id,
+                        'harga_beli'    => $d->harga_satuan,
+                        'jumlah_awal'   => $d->jumlah,
+                        'jumlah_sisa'   => $d->jumlah,
+                        'tanggal_masuk' => $d->pembelian->tanggal_pembelian,
+                    ]);
+                }
+            }
+        }
+        if ($restored > 0 && !$dryRun) {
+            $this->info(" ✔ Berhasil memulihkan {$restored} batch FIFO dari riwayat pembelian.");
+        } elseif ($restored === 0) {
+            $this->info(" ✔ Tidak ada batch FIFO yang hilang dari riwayat pembelian.");
+        }
+    }
 
     $bahans = \App\Models\BahanBaku::all();
     $selisihCount = 0;
