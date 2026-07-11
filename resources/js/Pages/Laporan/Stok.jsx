@@ -1,12 +1,28 @@
 import AppLayout from '@/Layouts/AppLayout';
 import LaporanTabs from './LaporanTabs';
 import { rupiah, formatStok } from '@/lib/utils';
-import { PrinterIcon, CubeIcon, ExclamationTriangleIcon, BanknotesIcon } from '@heroicons/react/24/outline';
+import { PrinterIcon, CubeIcon, ExclamationTriangleIcon, BanknotesIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useSortableData } from '@/lib/sort';
 import SortableHeader from '@/Components/SortableHeader';
+import { useState, useMemo } from 'react';
 
 export default function LaporanStok({ bahan_baku, total_nilai, jumlah_rendah }) {
-    const { items: sortedBahanBaku, sortConfig, requestSort } = useSortableData(bahan_baku);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('semua');
+
+    const filteredBahanBaku = useMemo(() => {
+        return bahan_baku.filter(item => {
+            const matchesSearch = !searchQuery || 
+                item.nama.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesStatus = 
+                statusFilter === 'semua' || 
+                (statusFilter === 'rendah' && item.is_rendah) ||
+                (statusFilter === 'aman' && !item.is_rendah);
+            return matchesSearch && matchesStatus;
+        });
+    }, [bahan_baku, searchQuery, statusFilter]);
+
+    const { items: sortedBahanBaku, sortConfig, requestSort } = useSortableData(filteredBahanBaku);
     const handlePrint = () => window.print();
 
     return (
@@ -83,6 +99,63 @@ export default function LaporanStok({ bahan_baku, total_nilai, jumlah_rendah }) 
                     </div>
                 </div>
 
+                {/* Search & Filter Bar */}
+                <div className="flex flex-col sm:flex-row gap-3 mb-6 print:hidden">
+                    <div className="relative flex-1">
+                        <MagnifyingGlassIcon className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Cari nama bahan baku (misal: indomie, kopi liong, telur)..."
+                            className="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl pl-11 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-white px-1"
+                                title="Hapus pencarian"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                        <button
+                            onClick={() => setStatusFilter('semua')}
+                            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 ${
+                                statusFilter === 'semua'
+                                    ? 'bg-slate-800 border-slate-500 text-white shadow-sm'
+                                    : 'bg-slate-900/60 border-slate-700/60 text-slate-400 hover:text-slate-200 hover:border-slate-600'
+                            }`}
+                        >
+                            Semua ({bahan_baku.length})
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter('rendah')}
+                            className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 ${
+                                statusFilter === 'rendah'
+                                    ? 'bg-red-500/15 border-red-500/50 text-red-400 shadow-sm'
+                                    : 'bg-slate-900/60 border-slate-700/60 text-slate-400 hover:text-red-400 hover:border-red-500/30'
+                            }`}
+                        >
+                            <ExclamationTriangleIcon className="w-4 h-4" />
+                            Menipis ({jumlah_rendah})
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter('aman')}
+                            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 ${
+                                statusFilter === 'aman'
+                                    ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-400 shadow-sm'
+                                    : 'bg-slate-900/60 border-slate-700/60 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30'
+                            }`}
+                        >
+                            Aman ({bahan_baku.length - jumlah_rendah})
+                        </button>
+                    </div>
+                </div>
+
                 {/* Table */}
                 <div className="bg-slate-900/60 print:bg-white rounded-2xl border border-slate-700/50 print:border-slate-300 overflow-hidden">
                     <div className="overflow-x-auto">
@@ -102,7 +175,11 @@ export default function LaporanStok({ bahan_baku, total_nilai, jumlah_rendah }) 
                                 {sortedBahanBaku.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
-                                            Belum ada data bahan baku.
+                                            {searchQuery || statusFilter !== 'semua' ? (
+                                                <span>Tidak ditemukan bahan baku yang cocok dengan pencarian/filter Anda.</span>
+                                            ) : (
+                                                <span>Belum ada data bahan baku.</span>
+                                            )}
                                         </td>
                                     </tr>
                                 ) : (
