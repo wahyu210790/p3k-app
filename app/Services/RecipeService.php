@@ -31,6 +31,7 @@ class RecipeService
     public function hitungEstimasiHPP(int $produkId, int $qty = 1): float
     {
         $produk = Produk::with('detailResep.bahanBaku')->findOrFail($produkId);
+        if (!$produk->has_resep || $produk->detailResep->isEmpty()) return 0.0;
         $totalHPP = 0.0;
 
         foreach ($produk->detailResep as $resep) {
@@ -64,6 +65,16 @@ class RecipeService
     public function gunakanResep(int $produkId, int $qty): array
     {
         $produk   = Produk::with('detailResep.bahanBaku')->findOrFail($produkId);
+        if (!$produk->has_resep || $produk->detailResep->isEmpty()) {
+            return [
+                'produk_id'        => $produkId,
+                'nama_produk'      => $produk->nama,
+                'qty'              => $qty,
+                'total_hpp'        => 0.0,
+                'hpp_satuan'       => 0,
+                'detail_penggunaan' => [],
+            ];
+        }
         $totalHPP = 0.0;
         $detail   = [];
 
@@ -106,6 +117,9 @@ class RecipeService
     public function cekStokCukup(int $produkId, int $qty): array
     {
         $produk    = Produk::with('detailResep.bahanBaku')->findOrFail($produkId);
+        if (!$produk->has_resep || $produk->detailResep->isEmpty()) {
+            return ['cukup' => true, 'kekurangan' => []];
+        }
         $cukup     = true;
         $kekurangan = [];
 
@@ -141,7 +155,7 @@ class RecipeService
     {
         $produk = Produk::with('detailResep.bahanBaku')->findOrFail($produkId);
 
-        if ($produk->detailResep->isEmpty()) return 9999;
+        if (!$produk->has_resep || $produk->detailResep->isEmpty()) return 9999;
 
         $maxQty = PHP_INT_MAX;
 
