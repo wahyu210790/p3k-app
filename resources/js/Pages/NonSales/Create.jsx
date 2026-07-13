@@ -3,6 +3,7 @@ import { useForm, Link } from '@inertiajs/react';
 import { PlusIcon, TrashIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { formatStok } from '@/lib/utils';
+import SearchableSelect from '@/Components/SearchableSelect';
 
 const Field = ({ label, error, children }) => (
     <div>
@@ -139,33 +140,27 @@ export default function NonSalesCreate({ label_kategori, produk, bahan_baku }) {
 
                                         <div className="flex-1 w-full sm:w-auto">
                                             {item.tipe === 'produk' ? (
-                                                <select
+                                                <SearchableSelect
+                                                    options={produk.map((prod) => ({
+                                                        value: prod.id,
+                                                        label: prod.nama,
+                                                        sublabel: `Kategori: ${prod.kategori}`,
+                                                    }))}
                                                     value={item.produk_id}
-                                                    onChange={(e) => updateItem(idx, 'produk_id', e.target.value)}
-                                                    className={inputClass}
-                                                    required
-                                                >
-                                                    <option value="">Pilih Produk (dengan resep)...</option>
-                                                    {produk.map((prod) => (
-                                                        <option key={prod.id} value={prod.id}>
-                                                            {prod.nama} ({prod.kategori})
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                    onChange={(val) => updateItem(idx, 'produk_id', val)}
+                                                    placeholder="Cari & Pilih Produk (dengan resep)..."
+                                                />
                                             ) : (
-                                                <select
+                                                <SearchableSelect
+                                                    options={bahan_baku.map((b) => ({
+                                                        value: b.id,
+                                                        label: b.nama,
+                                                        sublabel: `Stok: ${formatStok(b.stok_saat_ini)} ${b.satuan}`,
+                                                    }))}
                                                     value={item.bahan_baku_id}
-                                                    onChange={(e) => updateItem(idx, 'bahan_baku_id', e.target.value)}
-                                                    className={inputClass}
-                                                    required
-                                                >
-                                                    <option value="">Pilih Bahan Baku...</option>
-                                                    {bahan_baku.map((b) => (
-                                                        <option key={b.id} value={b.id}>
-                                                            {b.nama} (Stok: {formatStok(b.stok_saat_ini)} {b.satuan})
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                    onChange={(val) => updateItem(idx, 'bahan_baku_id', val)}
+                                                    placeholder="Cari & Pilih Bahan Baku..."
+                                                />
                                             )}
                                         </div>
 
