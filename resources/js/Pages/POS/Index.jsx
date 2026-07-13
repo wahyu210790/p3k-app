@@ -6,6 +6,7 @@ import {
     PlusIcon, MinusIcon, TrashIcon, ShoppingCartIcon,
     MagnifyingGlassIcon, CheckIcon, XMarkIcon,
     BookmarkIcon, ClipboardDocumentListIcon, ClockIcon,
+    ExclamationCircleIcon, ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 /* ── Komponen Kartu Produk ── */
@@ -82,7 +83,7 @@ function KeranjangItem({ item, onUpdate, onHapus }) {
 }
 
 /* ── Modal Checkout ── */
-function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
+function ModalCheckout({ total, keranjang, onClose, onSubmit, processing, errorMsg }) {
     const [metode, setMetode] = useState('cash');
     const [piutang, setPiutang] = useState({ nama_pelanggan: '', nomor_wa: '' });
     const [useCustomDate, setUseCustomDate] = useState(false);
@@ -106,7 +107,18 @@ function ModalCheckout({ total, keranjang, onClose, onSubmit, processing }) {
                     </button>
                 </div>
 
-                <div className="px-5 py-4 space-y-4">
+                <div className="px-5 py-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                    {/* Error Display */}
+                    {errorMsg && (
+                        <div className="bg-red-900/50 border border-red-500 rounded-xl p-3 text-xs text-red-200 flex items-start gap-2 shadow-sm animate-pulse">
+                            <ExclamationCircleIcon className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-bold text-red-300">Gagal Memproses Pesanan:</p>
+                                <p className="whitespace-pre-line mt-0.5 leading-relaxed">{errorMsg}</p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Total */}
                     <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 text-center">
                         <p className="text-xs text-amber-400 font-medium">TOTAL PEMBAYARAN</p>
@@ -485,6 +497,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
 
     const handleSubmit = (metode, piutangData, tanggalTransaksi = null) => {
         setProcessing(true);
+        setErrors({});
         router.post(route('pos.checkout'), {
             items: keranjang.map(i => ({
                 produk_id: i.produk_id,
@@ -602,8 +615,12 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
 
                     {/* Error */}
                     {errors.message && (
-                        <div className="mx-4 mt-3 px-3 py-2 bg-red-900/40 border border-red-700/50 rounded-xl text-xs text-red-300">
-                            {errors.message}
+                        <div className="mx-4 mt-3 px-3 py-2.5 bg-red-900/50 border border-red-500 rounded-xl text-xs text-red-200 flex items-start gap-2 shadow-sm">
+                            <ExclamationCircleIcon className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-bold text-red-300">Gagal Memproses Pesanan:</p>
+                                <p className="whitespace-pre-line mt-0.5 leading-relaxed">{errors.message}</p>
+                            </div>
                         </div>
                     )}
 
@@ -655,8 +672,8 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                 </div>
             </div>
 
-            {/* ── Floating Bar Keranjang (Khusus HP / Mobile) ── */}
-            {(keranjang.length > 0 || activeOpenBill) && (
+            {/* ── Bar / Tombol Keranjang Bawah (Khusus HP / Mobile) ── */}
+            {keranjang.length > 0 && !showMobileCart && (
                 <div 
                     onClick={() => setShowMobileCart(true)}
                     className="fixed bottom-4 left-4 right-4 z-30 lg:hidden bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-900 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between gap-3 transition-all cursor-pointer border-2 border-amber-300">
@@ -718,6 +735,17 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                             </div>
                         )}
 
+                        {/* Error Display di Drawer Mobile */}
+                        {errors.message && (
+                            <div className="mx-4 mt-3 p-3 bg-red-900/50 border border-red-500 rounded-xl text-xs text-red-200 flex items-start gap-2 shadow-sm shrink-0 animate-pulse">
+                                <ExclamationCircleIcon className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-bold text-red-300">Gagal Memproses Pesanan:</p>
+                                    <p className="whitespace-pre-line mt-0.5 leading-relaxed">{errors.message}</p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Drawer Items */}
                         <div className="p-4 overflow-y-auto space-y-2 flex-1">
                             {keranjang.length === 0 ? (
@@ -772,9 +800,10 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
                 <ModalCheckout
                     total={total}
                     keranjang={keranjang}
-                    onClose={() => setShowCheckout(false)}
+                    onClose={() => { setShowCheckout(false); setErrors({}); }}
                     onSubmit={handleSubmit}
                     processing={processing}
+                    errorMsg={errors.message}
                 />
             )}
 
