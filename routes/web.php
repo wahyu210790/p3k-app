@@ -94,6 +94,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/hutang',                          [HutangController::class, 'index'])->name('hutang.index');
         Route::post('/hutang/{hutang}/bayar',          [HutangController::class, 'bayar'])->name('hutang.bayar');
+        Route::post('/hutang/{hutang}/tutup-retur',    [HutangController::class, 'tutupRetur'])->name('hutang.tutup-retur');
 
         // ── Stock Opname ──────────────────────────────────────────────────────
         Route::get('/stock-opname',                      [StockOpnameController::class, 'index'] )->name('stock-opname.index');

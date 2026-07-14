@@ -9,6 +9,12 @@ export default function HutangIndex({ hutang, total_aktif, suppliers, filters })
         router.post(route('hutang.bayar', id), { jumlah_bayar: parseFloat(jml) });
     };
 
+    const handleTutupRetur = (id, namaSupplier, sisaHutang) => {
+        if (confirm(`Tutup LUNAS hutang ke ${namaSupplier} (Sisa Rp${sisaHutang.toLocaleString('id-ID')}) karena barang ditarik/retur titipan?\n\nPerhatian: Uang/saldo dompet TIDAK akan dipotong.`)) {
+            router.post(route('hutang.tutup-retur', id));
+        }
+    };
+
     return (
         <AppLayout title="Hutang Supplier">
             <div className="max-w-4xl mx-auto">
@@ -47,10 +53,17 @@ export default function HutangIndex({ hutang, total_aktif, suppliers, filters })
                                         {h.status === 'lunas' ? 'Lunas' : 'Belum Lunas'}
                                     </span>
                                     {h.status !== 'lunas' && (
-                                        <button onClick={() => handleBayar(h.id, h.sisa_hutang)}
-                                            className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold rounded-xl transition-all shrink-0">
-                                            Bayar
-                                        </button>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button onClick={() => handleBayar(h.id, h.sisa_hutang)}
+                                                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold rounded-xl transition-all">
+                                                Bayar
+                                            </button>
+                                            <button onClick={() => handleTutupRetur(h.id, h.supplier?.nama ?? 'Supplier', h.sisa_hutang)}
+                                                title="Tutup hutang karena barang sisa ditarik/retur titipan (tidak memotong uang dompet)"
+                                                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600/50 hover:border-slate-500 text-xs font-semibold rounded-xl transition-all">
+                                                Tutup Retur
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             ))}
