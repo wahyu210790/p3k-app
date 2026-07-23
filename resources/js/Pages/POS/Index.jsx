@@ -390,7 +390,7 @@ export default function POSIndex({ produk_per_kategori, open_bills = [] }) {
     }, [produk_per_kategori]);
 
     const kategoriList = useMemo(() => {
-        const defaultOrder = ['Makanan', 'Minuman', 'Rokok', 'Add-On / Topping', 'Lainnya'];
+        const defaultOrder = ['Makanan', 'Minuman', 'Rokok', 'Mentah', 'Add-On / Topping', 'Lainnya'];
         const keys = Object.keys(produk_per_kategori);
         const sorted = keys.sort((a, b) => {
             const idxA = defaultOrder.indexOf(a);
