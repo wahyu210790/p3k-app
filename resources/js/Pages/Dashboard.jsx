@@ -25,7 +25,7 @@ const DompetCard = ({ label, saldo, color }) => (
     </div>
 );
 
-export default function Dashboard({ keuangan, total_nilai_stok, stok_rendah, transaksi_hari_ini, piutang_mendesak }) {
+export default function Dashboard({ keuangan, total_nilai_stok, total_kasbon, stok_rendah, transaksi_hari_ini, piutang_mendesak }) {
     const hari = keuangan.hari_ini;
     const dompet = keuangan.dompet;
 
@@ -45,14 +45,21 @@ export default function Dashboard({ keuangan, total_nilai_stok, stok_rendah, tra
 
             {/* 3 Dompet */}
             <section className="mb-6">
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">💰 Saldo 3 Dompet</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">💰 Saldo Kas & Piutang Internal</h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <DompetCard label="Dompet Modal" saldo={dompet.modal}
                         color="bg-blue-900/50 border border-blue-700/50 text-blue-100" />
                     <DompetCard label="Dompet Operasional" saldo={dompet.operasional}
                         color="bg-violet-900/50 border border-violet-700/50 text-violet-100" />
                     <DompetCard label="Dompet Keuntungan" saldo={dompet.keuntungan}
                         color="bg-emerald-900/50 border border-emerald-700/50 text-emerald-100" />
+                    <div className="rounded-xl p-4 bg-orange-900/40 border border-orange-700/50 text-orange-100">
+                        <p className="text-xs font-semibold opacity-70 uppercase tracking-wide flex items-center justify-between">
+                            <span>Kasbon Aktif</span>
+                            <Link href={route('kasbon.index')} className="hover:text-white underline">Detail</Link>
+                        </p>
+                        <p className="text-xl font-bold mt-1">{rupiah(total_kasbon)}</p>
+                    </div>
                 </div>
             </section>
 

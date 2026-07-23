@@ -106,6 +106,9 @@ export default function AppLayout({ children, title = '' }) {
                             <NavLink href={route('hutang.index')} active={isActive('/hutang')} icon={TruckIcon} onClick={onClose}>
                                 Hutang Supplier
                             </NavLink>
+                            <NavLink href={route('kasbon.index')} active={isActive('/kasbon')} icon={BanknotesIcon} onClick={onClose}>
+                                Kasbon & Prive
+                            </NavLink>
                         </NavSection>
 
                         <NavSection title="Inventori">

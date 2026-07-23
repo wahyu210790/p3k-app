@@ -45,9 +45,13 @@ class DashboardController extends Controller
             ->get(['id', 'nama_pelanggan', 'nomor_wa', 'sisa_piutang', 'tanggal_piutang'])
             ->take(5);
 
+        // Kasbon Belum Lunas
+        $totalKasbon = \App\Models\Kasbon::where('status', 'belum_lunas')->sum('jumlah');
+
         return Inertia::render('Dashboard', [
             'keuangan'         => $keuangan,
             'total_nilai_stok' => $totalStok,
+            'total_kasbon'     => (float) $totalKasbon,
             'stok_rendah'      => $stokRendah,
             'transaksi_hari_ini' => $transaksiTerakhir,
             'piutang_mendesak' => $piutangMendesak,

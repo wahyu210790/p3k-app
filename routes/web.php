@@ -96,6 +96,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/hutang/{hutang}/bayar',          [HutangController::class, 'bayar'])->name('hutang.bayar');
         Route::post('/hutang/{hutang}/tutup-retur',    [HutangController::class, 'tutupRetur'])->name('hutang.tutup-retur');
 
+        // Kasbon
+        Route::get('/kasbon', [App\Http\Controllers\KasbonController::class, 'index'])->name('kasbon.index');
+        Route::post('/kasbon', [App\Http\Controllers\KasbonController::class, 'store'])->name('kasbon.store');
+        Route::post('/kasbon/{kasbon}/pelunasan', [App\Http\Controllers\KasbonController::class, 'pelunasan'])->name('kasbon.pelunasan');
+        Route::delete('/kasbon/{kasbon}', [App\Http\Controllers\KasbonController::class, 'destroy'])->name('kasbon.destroy');
+
         // ── Stock Opname ──────────────────────────────────────────────────────
         Route::get('/stock-opname',                      [StockOpnameController::class, 'index'] )->name('stock-opname.index');
         Route::get('/stock-opname/catat',                [StockOpnameController::class, 'create'])->name('stock-opname.create');
